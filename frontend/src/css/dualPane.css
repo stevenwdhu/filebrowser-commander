@@ -224,32 +224,41 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
   font-size: 2.2em;
 }
 
+/* One row when the summary and the keys fit side by side; otherwise the keys wrap onto a row of their own */
 .dual-pane-footer {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5em;
-  height: 2.5em;
+  column-gap: 0.5em;
+  min-height: 2.5em;
   padding: 0 0.5em 0 1em;
   border-top: 1px solid var(--divider);
   background-color: var(--panel-bg);
   color: var(--textSecondary);
   font-size: 0.9em;
   white-space: nowrap;
-  container-type: inline-size;
 }
 
 .dual-pane-footer-summary {
-  flex: 1 1 auto;
+  flex: 1 1 12em;
   min-width: 0;
   overflow: hidden;
+  line-height: 2.5em;
   text-overflow: ellipsis;
 }
 
+/* In a pane too narrow even for that row, the keys wrap rather than lose their names */
 .dual-pane-keybar {
   display: flex;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.25em;
+  min-width: 0;
+  margin-left: auto;
+  padding-bottom: 0.3em;
+  padding-top: 0.3em;
 }
 
 .dual-pane-keybar-button {
@@ -285,12 +294,6 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
   font-size: 0.85em;
 }
 
-/* Narrow pane: keys only */
-@container (width < 36rem) {
-  .dual-pane-keybar-label {
-    display: none;
-  }
-}
 
 /* Divider between the panes, over the right pane's left edge */
 .dual-pane-divider {
