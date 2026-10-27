@@ -18,6 +18,10 @@ vi.mock("@/store", () => ({
   getters: {
     isShare: () => store.share,
     canCreateInSource: (source) => !store.readOnlySources.includes(source),
+    sourcePermissions: (source) => {
+      const writable = !store.readOnlySources.includes(source);
+      return { create: writable, modify: writable };
+    },
     isPreviewView: () => false,
   },
   mutations: { setReload: vi.fn(), closeTopPrompt: vi.fn(), setSearch: vi.fn(), showPrompt: vi.fn() },

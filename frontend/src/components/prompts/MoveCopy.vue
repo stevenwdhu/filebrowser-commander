@@ -1,14 +1,26 @@
 <template>
   <div class="card-content">
+    <!-- Drag and drop prompts only show the spinner; the drop handler runs the operation -->
+    <MoveCopySummary
+      v-if="!operationInProgress"
+      :items="localItems"
+      :dest-source="resolvedDestSource"
+      :dest-path="destPath"
+      :show-source="showDestSource"
+      :block-message="blockMessage"
+      :block-message-id="blockMessageId"
+      :progress="progress"
+    />
     <!-- Loading spinner overlay -->
     <!-- changed to v-show (for keep the loading spinner), otherwise the path showed in the prompt will be always "/" -->
-    <div v-show="isLoading" class="loading-content">
+    <div v-show="isLoading && !progress" class="loading-content">
       <LoadingSpinner size="small" mode="placeholder" />
       <p class="loading-text">{{ $t("prompts.operationInProgress") }}</p>
     </div>
     <div v-show="!isLoading">
       <file-list
         ref="fileList"
+        :browse-path="initialBrowsePath"
         :hide-path-chrome="!isShareContext"
         :sortable="true"
         v-model:filter-query="filterQuery"
@@ -64,11 +76,13 @@
     <button
       type="button"
       v-else
-      :disabled="destContainsSrc || isLoading"
+      :disabled="isLoading"
+      :aria-disabled="blockReason ? 'true' : undefined"
       class="button button--flat"
       @click="performOperation"
       :aria-label="operation === 'move' ? $t('general.move') : $t('general.copy')"
-      :title="operation === 'move' ? $t('general.move') : $t('general.copy')"
+      :aria-describedby="blockReason ? blockMessageId : undefined"
+      :title="blockMessage || (operation === 'move' ? $t('general.move') : $t('general.copy'))"
     >
       {{ operation === 'move' ? $t('general.move') : $t('general.copy') }}
     </button>
@@ -103,12 +117,14 @@ import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import PathPickerButton from "@/components/files/PathPickerButton.vue";
 import ListingFilter from "@/components/files/ListingFilter.vue";
 import MoveCopyQuickDestinations from "@/components/prompts/MoveCopyQuickDestinations.vue";
+import MoveCopySummary from "@/components/prompts/MoveCopySummary.vue";
 import { eventBus } from '@/store/eventBus';
 import { normalizeDirPath, recordRecentDestination } from "@/utils/moveCopyDestinations";
+import { blockReasonMessage, moveCopyBlockReason, runInBatches } from "@/utils/moveCopyPlan";
 
 export default {
   name: "move-copy",
-  components: { FileList, LoadingSpinner, PathPickerButton, ListingFilter, MoveCopyQuickDestinations },
+  components: { FileList, LoadingSpinner, PathPickerButton, ListingFilter, MoveCopyQuickDestinations, MoveCopySummary },
   props: {
     promptId: {
       type: [String, Number],
@@ -133,39 +149,59 @@ export default {
     current: window.location.pathname,
     destPath: "/", // Start at root of selected source
     destSource: null, // Will be set by FileList component
+    destError: false, // The destination listing failed to load
     localItems: [], // Will hold the items to operate on
     isLoading: false, // Track loading state for spinner
     showNewDirInput: false, // When true will replace the new folder button with a input field
     newDirName: "",
     filterQuery: "",
+    progress: null, // { done, total, current } while items are being copied/moved
   }),
   computed: {
-    destContainsSrc() {
-      if (!this.destPath) {
-        return false; // If dest is not set, we can't check containment
+    // From a file preview, start in the file's folder rather than at the file itself
+    initialBrowsePath() {
+      const req = state.req;
+      if (!req?.type || req.type === "directory" || !req.path) {
+        return null;
       }
-      // Add null checks to prevent undefined errors
-      if (!this.localItems || this.localItems.length === 0) {
-        return false;
+      return normalizeDirPath(url.removeLastDir(req.path));
+    },
+    resolvedDestSource() {
+      return this.destSource || this.localItems[0]?.fromSource || state.req?.source;
+    },
+    // Mirrors the server: a share only needs modify; otherwise copy needs create on the destination
+    // and a move to another source needs modify
+    canWriteDestination() {
+      const perms = getters.sourcePermissions(this.resolvedDestSource);
+      if (getters.isShare()) {
+        return Boolean(perms?.modify);
       }
-      const itemPath = this.localItems[0]?.from;
-      if (!itemPath) {
-        return false; // If itemPath is undefined, we can't check containment
+      if (this.operation === "copy") {
+        return Boolean(perms?.create);
       }
-      // For different sources, allow move to root path
-      if (this.destSource !== this.localItems[0]?.fromSource) {
-        return false;
+      return this.resolvedDestSource === this.localItems[0]?.fromSource || Boolean(perms?.modify);
+    },
+    blockReason() {
+      if (this.operationInProgress) {
+        return null;
       }
-      // For move, prevent moving to the same directory, but for copy allow it.
-      if (this.operation === "move") {
-        const parentDir = `${url.removeLastDir(itemPath)}/`;
-        // Only disable if moving to the exact same directory
-        if (this.destPath === parentDir) {
-          return true;
-        }
-      }
-      // Prevent move/copy into itself or subdirectories (into itself too)
-      return this.destPath.startsWith(`${itemPath}/`) || this.destPath === itemPath;
+      return moveCopyBlockReason({
+        operation: this.operation,
+        items: this.localItems,
+        destSource: this.resolvedDestSource,
+        destPath: this.destPath,
+        destError: this.destError,
+        canWrite: this.canWriteDestination,
+      });
+    },
+    blockMessage() {
+      return blockReasonMessage(this.blockReason, (key) => this.$t(key));
+    },
+    showDestSource() {
+      return !this.isShareContext && Object.keys(state.sources?.info || {}).length > 1;
+    },
+    blockMessageId() {
+      return `move-copy-blocked-${this.promptId ?? "prompt"}`;
     },
     canCreateFolder() {
       const destSource =
@@ -186,6 +222,8 @@ export default {
         from: item.path,
         fromSource: item.source,
         name: item.name,
+        type: item.type,
+        size: item.size,
       }));
     } else if (state.isSearchActive) {
       // Add null checks to prevent undefined values
@@ -195,6 +233,8 @@ export default {
             from: state.selected[0].path,
             fromSource: state.selected[0].source,
             name: state.selected[0].name,
+            type: state.selected[0].type,
+            size: state.selected[0].size,
           },
         ];
       }
@@ -207,6 +247,8 @@ export default {
               from: reqItem.path,
               fromSource: state.req.source,
               name: reqItem.name,
+              type: reqItem.type,
+              size: reqItem.size,
             });
           }
         }
@@ -224,6 +266,7 @@ export default {
       void this.syncFileListFromPicker();
     },
     async syncFileListFromPicker() {
+      this.destError = false; // FileList reports again once the new listing loads
       await this.$nextTick();
       if (this.$refs.fileList && this.destSource && this.destPath) {
         this.$refs.fileList.jumpTo(this.destSource, this.destPath);
@@ -298,11 +341,12 @@ export default {
         this.destPath = pathOrData.path;
         // Update destSource from FileList's selection
         this.destSource = pathOrData.source;
+        this.destError = Boolean(pathOrData.error);
       }
     },
     async performOperation(event) {
       event.preventDefault();
-      if (this.isLoading) {
+      if (this.isLoading || this.blockReason) {
         return;
       }
       this.isLoading = true; // Show loading spinner
@@ -323,15 +367,15 @@ export default {
           };
         });
         // Define the action function
+        // Items go in batches so the prompt can show progress; the results are merged
         const action = async (overwrite, rename) => {
           buttons.loading(this.operation);
-          let result;
-          if (getters.isShare()) {
-            result = await resourcesApi.moveCopyPublic(state.shareInfo.hash, itemsToProcess, this.operation, overwrite, rename);
-          } else {
-            result = await resourcesApi.moveCopy(itemsToProcess, this.operation, overwrite, rename);
-          }
-          return result; // Return the result to check for failures
+          const runBatch = (batch) => (getters.isShare()
+            ? resourcesApi.moveCopyPublic(state.shareInfo.hash, batch, this.operation, overwrite, rename)
+            : resourcesApi.moveCopy(batch, this.operation, overwrite, rename));
+          return runInBatches(itemsToProcess, runBatch, (progress) => {
+            this.progress = progress;
+          });
         };
         let conflict = false;
         let dstResp = null;
@@ -375,6 +419,7 @@ export default {
                   reject(e); // Reject the promise if an error occurs
                 } finally {
                   this.isLoading = false;
+                  this.progress = null;
                 }
               },
             });
@@ -479,6 +524,7 @@ export default {
         notifyMoveCopyFailure(error, this.$t("prompts.operationFailed"));
       } finally {
         this.isLoading = false; // Hide loading spinner
+        this.progress = null;
       }
     },
   },
@@ -513,6 +559,12 @@ export default {
 
 .split-buttons {
   justify-content: space-between;
+}
+
+/* Blocked but still focusable, so the reason is read out */
+.button[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 </style>
