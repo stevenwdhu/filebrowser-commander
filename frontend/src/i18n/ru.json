@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Папку нельзя скопировать или переместить в саму себя",
     "moveCopyNoPermission": "У вас нет прав на добавление элементов здесь",
     "moveCopyProgress": "Выполнено {done} из {total}",
+    "typeDestinationPath": "Ввести путь",
     "closeWithActiveUploadsMessage": "Предупреждение: У вас есть активные загрузки, и закрытие окна загрузки может привести к незавершенным загрузкам. Что бы вы хотели сделать?",
     "closeWithActiveUploads": "Активные загрузки",
     "basicInfo": "Основная информация",

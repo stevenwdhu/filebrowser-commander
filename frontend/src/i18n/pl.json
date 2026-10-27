@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Folderu nie można skopiować ani przenieść do niego samego",
     "moveCopyNoPermission": "Nie masz uprawnień do dodawania elementów w tym miejscu",
     "moveCopyProgress": "Ukończono {done} z {total}",
+    "typeDestinationPath": "Wpisz ścieżkę",
     "closeWithActiveUploadsMessage": "Ostrzeżenie: Masz aktywne przesyłanie, a zamknięcie monitu o przesłanie może spowodować niedokończone przesyłanie. Co chcesz zrobić?",
     "closeWithActiveUploads": "Aktywne przesyłanie",
     "basicInfo": "Podstawowe informacje",

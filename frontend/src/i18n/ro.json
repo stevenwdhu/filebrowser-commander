@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Un dosar nu poate fi copiat sau mutat în el însuși",
     "moveCopyNoPermission": "Nu aveți permisiunea de a adăuga elemente aici",
     "moveCopyProgress": "{done} din {total} finalizate",
+    "typeDestinationPath": "Introduceți o cale",
     "closeWithActiveUploadsMessage": "Atenție: Aveți încărcări active și închiderea solicitării de încărcare ar putea duce la încărcări neterminate. Ce ați dori să faceți?",
     "closeWithActiveUploads": "Încărcări active",
     "basicInfo": "Informații de bază",

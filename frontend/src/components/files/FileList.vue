@@ -143,6 +143,11 @@ export default {
       type: Boolean,
       default: true,
     },
+    /** Open folders on a single click instead of selecting them (the single-click setting). */
+    openOnClick: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     const initialSource = this.browseSource || state.req.source;
@@ -341,6 +346,10 @@ export default {
       this.loading = true;
       try {
         const req = await fetchListing();
+        // A file (e.g. a typed path) is not a folder that can be listed or chosen
+        if (req?.type && req.type !== "directory") {
+          throw new Error(`${req.path || this.path} is not a folder`);
+        }
         if (requestId === this.loadRequestId) {
           this.fillOptions(req);
         }
@@ -573,11 +582,26 @@ export default {
         preventDefault: () => {},
         stopPropagation: () => {},
       };
+      if (this.openOnClick && item.type === "directory") {
+        // The second click of a double click would land on whatever row the opened folder shows there
+        if (event.detail > 1) return;
+        // The folder being opened is the choice straight away, not once its listing has loaded
+        this.$emit("update:selected", {
+          path: item.path,
+          source: item.source || this.source,
+          type: "directory",
+          isValid: !this.requireFileSelection,
+        });
+        this.next(syntheticEvent);
+        return;
+      }
       this.select(syntheticEvent);
     },
     handleItemDblClick(item, _index, event) {
       event.preventDefault();
       event.stopPropagation();
+      // The first click already opened the folder
+      if (this.openOnClick && item.type === "directory") return;
 
       const syntheticEvent = {
         currentTarget: {
@@ -681,8 +705,13 @@ export default {
       return this.ownsContextMenu && !!this.contextItemPath && item.path === this.contextItemPath;
     },
     attachScrollListener() {
-      const el = this.$el.closest(".floating-window > .card-content");
-      if (!el) return;
+      const prompt = this.$el.closest(".floating-window > .card-content");
+      if (!prompt) return;
+      // The prompt, unless the list scrolls in its own pane inside it (move/copy)
+      let el = this.$el.parentElement;
+      while (el !== prompt && !/(auto|scroll)/.test(getComputedStyle(el).overflowY)) {
+        el = el.parentElement;
+      }
       el.addEventListener("scroll", this.handleScroll, { passive: true });
       this.scrollContainer = el;
     },

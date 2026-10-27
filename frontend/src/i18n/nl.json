@@ -503,6 +503,7 @@
     "moveCopyIntoItself": "Een map kan niet naar zichzelf worden gekopieerd of verplaatst",
     "moveCopyNoPermission": "Je hebt geen toestemming om hier items toe te voegen",
     "moveCopyProgress": "{done} van {total} klaar",
+    "typeDestinationPath": "Pad typen",
     "closeWithActiveUploads": "Actieve uploads",
     "closeWithActiveUploadsMessage": "Waarschuwing: U hebt actieve uploads en het sluiten van het uploadvenster kan resulteren in onvoltooide uploads. Wat wilt u doen?",
     "basicInfo": "Basisinformatie",

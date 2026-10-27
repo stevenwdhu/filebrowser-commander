@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "无法将文件夹复制或移动到其自身中",
     "moveCopyNoPermission": "你没有在此处添加项目的权限",
     "moveCopyProgress": "已完成 {done}/{total}",
+    "typeDestinationPath": "输入路径",
     "closeWithActiveUploadsMessage": "警告：您正在上传，关闭上传提示可能会导致上传未完成。您想做什么？",
     "closeWithActiveUploads": "主动上传",
     "basicInfo": "基本信息",

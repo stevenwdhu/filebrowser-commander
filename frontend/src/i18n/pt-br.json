@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Uma pasta não pode ser copiada ou movida para dentro de si mesma",
     "moveCopyNoPermission": "Você não tem permissão para adicionar itens aqui",
     "moveCopyProgress": "{done} de {total} concluídos",
+    "typeDestinationPath": "Digitar um caminho",
     "closeWithActiveUploadsMessage": "Aviso: Você tem uploads ativos e fechar o prompt de upload pode resultar em uploads inacabados. O que você gostaria de fazer?",
     "closeWithActiveUploads": "Uploads ativos",
     "basicInfo": "Informações básicas",

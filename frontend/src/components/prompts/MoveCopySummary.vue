@@ -5,11 +5,14 @@
       <span class="move-copy-summary-text">{{ itemsLabel }}</span>
       <span v-if="sizeLabel" class="move-copy-summary-muted">{{ sizeLabel }}</span>
     </div>
-    <div class="move-copy-summary-row" data-testid="move-copy-destination">
-      <span class="move-copy-summary-muted">{{ $t("prompts.destinationPath") }}</span>
-      <span v-if="showSource && destSource" class="move-copy-summary-source">{{ destSource }}</span>
-      <span class="move-copy-summary-text" :title="destPath">{{ destPath }}</span>
-    </div>
+    <MoveCopyDestination
+      :source="destSource"
+      :path="destPath"
+      :show-source="showSource"
+      :sources="sources"
+      :interactive="interactive"
+      @navigate="$emit('navigate', $event)"
+    />
     <!-- Always rendered so screen readers announce the reason when it appears -->
     <div role="status" aria-atomic="true">
       <p
@@ -46,11 +49,13 @@
 </template>
 
 <script>
+import MoveCopyDestination from "@/components/prompts/MoveCopyDestination.vue";
 import { getHumanReadableFilesize } from "@/utils/filesizes";
 import { summarizeItems } from "@/utils/moveCopyPlan";
 
 export default {
   name: "MoveCopySummary",
+  components: { MoveCopyDestination },
   props: {
     // Prompt items: { from, fromSource, name, type?, size? }
     items: {
@@ -70,6 +75,16 @@ export default {
       type: Boolean,
       default: false,
     },
+    // Sources the destination can switch to
+    sources: {
+      type: Array,
+      default: () => [],
+    },
+    // Lets the destination row change the folder; off inside shares and while the operation runs
+    interactive: {
+      type: Boolean,
+      default: false,
+    },
     blockMessage: {
       type: String,
       default: "",
@@ -84,6 +99,7 @@ export default {
       default: null,
     },
   },
+  emits: ["navigate"],
   computed: {
     summary() {
       return summarizeItems(this.items);
@@ -155,7 +171,8 @@ export default {
   color: var(--primaryColor);
 }
 
-.move-copy-summary-text {
+/* :deep() so these also style the destination row, a child component */
+.move-copy-summary :deep(.move-copy-summary-text) {
   min-width: 0;
   overflow: hidden;
   font-weight: 500;
@@ -163,12 +180,12 @@ export default {
   white-space: nowrap;
 }
 
-.move-copy-summary-muted {
+.move-copy-summary :deep(.move-copy-summary-muted) {
   flex: 0 0 auto;
   color: var(--textSecondary);
 }
 
-.move-copy-summary-source {
+.move-copy-summary :deep(.move-copy-summary-source) {
   flex: 0 0 auto;
   padding: 0 0.4em;
   border: 1px solid var(--divider);

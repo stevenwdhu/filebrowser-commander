@@ -26,6 +26,36 @@ export function destinationKey(source, path) {
   return `${source}::${normalizeDirPath(path)}`;
 }
 
+/** One { name, path } per folder below the root, e.g. "/a/b/" -> [{ a, "/a/" }, { b, "/a/b/" }] */
+export function pathSegments(path) {
+  const segments = [];
+  let current = "/";
+  for (const name of normalizeDirPath(path).split("/").filter(Boolean)) {
+    current = `${current}${name}/`;
+    segments.push({ name, path: current });
+  }
+  return segments;
+}
+
+/**
+ * A folder path the user typed, as a directory path: "." parts are dropped and ".." goes up one
+ * level, never above the root. Blank input gives null.
+ */
+export function parseTypedPath(text) {
+  const trimmed = String(text ?? "").trim();
+  if (!trimmed) return null;
+  const parts = [];
+  for (const part of trimmed.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") {
+      parts.pop();
+    } else {
+      parts.push(part);
+    }
+  }
+  return normalizeDirPath(parts.join("/"));
+}
+
 function isKnownSource(sourceInfo, name) {
   return Boolean(sourceInfo) && Object.hasOwn(sourceInfo, name);
 }

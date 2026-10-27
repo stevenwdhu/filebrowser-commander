@@ -1,7 +1,7 @@
 import { createApp, h, nextTick } from "vue";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { store, state, api, fileListProps } = vi.hoisted(() => ({
+const { store, state, api, fileListProps, jumpTo } = vi.hoisted(() => ({
   store: { readOnlySources: [], share: null },
   state: {
     user: { username: "alice", sidebarLinks: [] },
@@ -13,6 +13,7 @@ const { store, state, api, fileListProps } = vi.hoisted(() => ({
   },
   api: { fetchFiles: vi.fn(), moveCopy: vi.fn() },
   fileListProps: {},
+  jumpTo: vi.fn(),
 }));
 vi.mock("@/store", () => ({
   state,
@@ -45,15 +46,15 @@ vi.mock("@/components/files/ListingFilter.vue", () => ({ default: { render: () =
 vi.mock("@/components/files/FileList.vue", () => ({
   default: {
     name: "FileList",
-    props: { browsePath: String },
-    methods: { jumpTo: vi.fn() },
+    props: { browsePath: String, openOnClick: Boolean },
+    methods: { jumpTo },
     render() {
       fileListProps.browsePath = this.browsePath;
+      fileListProps.openOnClick = this.openOnClick;
       return h("div", this.$slots.sticky?.());
     },
   },
 }));
-vi.mock("@/components/files/PathPickerButton.vue", () => ({ default: { render: () => null } }));
 import MoveCopy from "./MoveCopy.vue";
 
 let app, root;
@@ -69,6 +70,17 @@ const text = (testId) => {
   const element = root.querySelector(`[data-testid="${testId}"]`);
   return element && [...element.children].map((child) => child.textContent.trim()).filter(Boolean).join(" ");
 };
+// Source and path on the destination row
+const destination = () => {
+  const row = root.querySelector('[data-testid="move-copy-destination"]');
+  if (!row) return null;
+  const select = row.querySelector("select");
+  const chip = row.querySelector(".move-copy-summary-source");
+  return {
+    source: select ? select.value : (chip?.textContent ?? null),
+    path: row.querySelector(".move-copy-destination-crumbs, .move-copy-summary-text").textContent,
+  };
+};
 const actionButton = (operation) => root.querySelector(`button[aria-label="general.${operation}"]`);
 const folder = (path, source = "tank") => ({ path, source, type: "directory", name: path.split("/").filter(Boolean).pop() });
 
@@ -80,6 +92,7 @@ describe("MoveCopy summary", () => {
     state.req = { source: "tank", path: "/", type: "directory", items: [] };
     state.selected = [];
     state.sources.info = { tank: {}, backup: {} };
+    state.user.singleClick = false;
     api.fetchFiles.mockResolvedValue({ items: [] });
   });
   afterEach(() => {
@@ -94,7 +107,76 @@ describe("MoveCopy summary", () => {
     vm.destSource = "backup";
     vm.destPath = "/archive/";
     await nextTick();
-    expect(text("move-copy-destination")).toBe("prompts.destinationPath backup /archive/");
+    expect(destination()).toEqual({ source: "backup", path: "/archive/" });
+  });
+
+  it("changes the destination from its own row rather than a second picker", async () => {
+    const vm = mount("copy", [folder("/photos/")]);
+    vm.updateDestination({ path: "/media/movies/", source: "tank" });
+    await nextTick();
+    expect(root.querySelector(".unified-path-picker")).toBeNull();
+    const crumb = [...root.querySelectorAll('[data-testid="move-copy-destination-crumb"]')].find(
+      (button) => button.textContent === "media",
+    );
+    crumb.click();
+    await nextTick();
+    expect(jumpTo).toHaveBeenLastCalledWith("tank", "/media/");
+    expect(destination()).toEqual({ source: "tank", path: "/media/" });
+
+    const select = root.querySelector('[data-testid="move-copy-destination-source"]');
+    select.value = "backup";
+    select.dispatchEvent(new Event("change"));
+    await nextTick();
+    expect(jumpTo).toHaveBeenLastCalledWith("backup", "/");
+    expect(destination()).toEqual({ source: "backup", path: "/" });
+  });
+
+  it("goes back to the folder it started in when the source is switched back", async () => {
+    state.req = { source: "tank", path: "/photos/2024/", type: "directory", items: [] };
+    const vm = mount("copy", [folder("/photos/2024/a/")]);
+    vm.updateDestination({ path: "/photos/2024/", source: "tank" });
+    await nextTick();
+    const select = root.querySelector('[data-testid="move-copy-destination-source"]');
+    select.value = "backup";
+    select.dispatchEvent(new Event("change"));
+    await nextTick();
+    expect(jumpTo).toHaveBeenLastCalledWith("backup", "/");
+    select.value = "tank";
+    select.dispatchEvent(new Event("change"));
+    await nextTick();
+    expect(jumpTo).toHaveBeenLastCalledWith("tank", "/photos/2024/");
+    expect(destination()).toEqual({ source: "tank", path: "/photos/2024/" });
+  });
+
+  it("opens folders on a single click when the user has the single-click setting on", async () => {
+    mount("copy", [folder("/a/")]);
+    await nextTick();
+    expect(fileListProps.openOnClick).toBe(false);
+    app.unmount();
+    state.user.singleClick = true;
+    mount("copy", [folder("/a/")]);
+    await nextTick();
+    expect(fileListProps.openOnClick).toBe(true);
+  });
+
+  it("keeps the destination row as plain text inside a share and while the items are copied", async () => {
+    store.share = { modify: true, create: true };
+    mount("copy", [folder("/a/")]);
+    await nextTick();
+    expect(root.querySelector('[data-testid="move-copy-destination-crumb"]')).toBeNull();
+    expect(root.querySelector('[data-testid="move-copy-destination-edit"]')).toBeNull();
+    app.unmount();
+    store.share = null;
+    api.moveCopy.mockImplementation(() => new Promise(() => {}));
+    const vm = mount("copy", [folder("/a/")]);
+    vm.destSource = "backup";
+    await nextTick();
+    expect(root.querySelector('[data-testid="move-copy-destination-edit"]')).not.toBeNull();
+    actionButton("copy").click();
+    await vi.waitFor(() => expect(vm.isLoading).toBe(true));
+    await nextTick();
+    expect(root.querySelector('[data-testid="move-copy-destination-edit"]')).toBeNull();
+    expect(root.querySelector('[data-testid="move-copy-destination-source"]')).toBeNull();
   });
 
   it("counts folders and files when there are several", async () => {
@@ -156,12 +238,12 @@ describe("MoveCopy summary", () => {
     mount("copy", [{ path: "/docs/report.pdf", source: "tank", name: "report.pdf" }]);
     await nextTick();
     expect(fileListProps.browsePath).toBe("/docs/");
-    expect(text("move-copy-destination")).toContain("tank");
+    expect(destination().source).toBe("tank");
     app.unmount();
     state.sources.info = { tank: {} };
     mount("copy", [{ path: "/docs/report.pdf", source: "tank", name: "report.pdf" }]);
     await nextTick();
-    expect(text("move-copy-destination")).not.toContain("tank");
+    expect(destination().source).toBeNull();
   });
 
   it("explains a read-only destination and one that failed to load", async () => {

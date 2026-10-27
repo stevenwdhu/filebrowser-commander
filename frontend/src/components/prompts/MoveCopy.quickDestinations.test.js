@@ -48,14 +48,6 @@ vi.mock("@/components/files/FileList.vue", () => ({
     render() { return h("div", this.$slots.sticky?.()); },
   },
 }));
-vi.mock("@/components/files/PathPickerButton.vue", () => ({
-  default: {
-    name: "PathPickerButton",
-    props: { path: String, source: String },
-    emits: ["update:path", "update:source", "navigate"],
-    render: () => null,
-  },
-}));
 import { loadRecentDestinations, recordRecentDestination } from "@/utils/moveCopyDestinations.js";
 import MoveCopy from "./MoveCopy.vue";
 

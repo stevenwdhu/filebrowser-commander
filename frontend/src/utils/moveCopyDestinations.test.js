@@ -5,6 +5,8 @@ import {
   destinationKey,
   loadRecentDestinations,
   normalizeDirPath,
+  parseTypedPath,
+  pathSegments,
   recordRecentDestination,
 } from "./moveCopyDestinations.js";
 
@@ -24,6 +26,37 @@ describe("normalizeDirPath", () => {
   it("gives the same key with or without a trailing slash", () => {
     expect(destinationKey("tank", "/a/b")).toBe(destinationKey("tank", "/a/b/"));
     expect(destinationKey("tank", "/a/")).not.toBe(destinationKey("backup", "/a/"));
+  });
+});
+
+describe("pathSegments", () => {
+  it("gives one entry per folder below the root", () => {
+    expect(pathSegments("/")).toEqual([]);
+    expect(pathSegments("/photos/2024/")).toEqual([
+      { name: "photos", path: "/photos/" },
+      { name: "2024", path: "/photos/2024/" },
+    ]);
+    expect(pathSegments("photos/2024")).toEqual(pathSegments("/photos/2024/"));
+  });
+});
+
+describe("parseTypedPath", () => {
+  it("turns what the user typed into a folder path", () => {
+    expect(parseTypedPath("/photos/2024")).toBe("/photos/2024/");
+    expect(parseTypedPath("  photos//2024/  ")).toBe("/photos/2024/");
+    expect(parseTypedPath("/")).toBe("/");
+    expect(parseTypedPath("/my folder/")).toBe("/my folder/");
+  });
+
+  it("resolves . and .. without going above the root", () => {
+    expect(parseTypedPath("/photos/./2024/../2025")).toBe("/photos/2025/");
+    expect(parseTypedPath("/photos/../../..")).toBe("/");
+  });
+
+  it("ignores blank input", () => {
+    expect(parseTypedPath("")).toBeNull();
+    expect(parseTypedPath("   ")).toBeNull();
+    expect(parseTypedPath(null)).toBeNull();
   });
 });
 

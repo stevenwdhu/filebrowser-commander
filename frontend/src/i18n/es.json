@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Una carpeta no se puede copiar ni mover dentro de sí misma",
     "moveCopyNoPermission": "No tienes permiso para añadir elementos aquí",
     "moveCopyProgress": "{done} de {total} completados",
+    "typeDestinationPath": "Escribir una ruta",
     "closeWithActiveUploadsMessage": "Si cierras esta ventana, puede que la subida de archivos se interrumpa y que algunos queden incompletos. ¿Qué quieres hacer?",
     "closeWithActiveUploads": "Subida de archivos activa",
     "basicInfo": "Información básica",

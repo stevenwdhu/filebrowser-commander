@@ -1,5 +1,6 @@
 <template>
-  <div class="card-content">
+  <!-- prompt-panel: the summary stays put and only the folder list scrolls -->
+  <div class="card-content prompt-panel">
     <!-- Drag and drop prompts only show the spinner; the drop handler runs the operation -->
     <MoveCopySummary
       v-if="!operationInProgress"
@@ -7,9 +8,12 @@
       :dest-source="resolvedDestSource"
       :dest-path="destPath"
       :show-source="showDestSource"
+      :sources="destinationSources"
+      :interactive="!isShareContext && !isLoading"
       :block-message="blockMessage"
       :block-message-id="blockMessageId"
       :progress="progress"
+      @navigate="selectDestination"
     />
     <!-- Loading spinner overlay -->
     <!-- changed to v-show (for keep the loading spinner), otherwise the path showed in the prompt will be always "/" -->
@@ -17,31 +21,22 @@
       <LoadingSpinner size="small" mode="placeholder" />
       <p class="loading-text">{{ $t("prompts.operationInProgress") }}</p>
     </div>
-    <div v-show="!isLoading">
+    <div v-show="!isLoading" class="move-copy-browser">
       <file-list
         ref="fileList"
         :browse-path="initialBrowsePath"
         :hide-path-chrome="!isShareContext"
+        :open-on-click="openFoldersOnClick"
         :sortable="true"
         v-model:filter-query="filterQuery"
         @update:selected="updateDestination"
       >
         <template #sticky>
-          <PathPickerButton
-            v-if="!isShareContext"
-            v-model:path="destPath"
-            v-model:source="destSource"
-            class="move-copy-path-picker"
-            :show-files="false"
-            :show-folders="true"
-            :placeholder="$t('sidebar.chooseSource')"
-            @navigate="syncFileListFromPicker"
-          />
           <MoveCopyQuickDestinations
             v-if="!isShareContext"
             :dest-source="destSource"
             :dest-path="destPath"
-            @select="selectQuickDestination"
+            @select="selectDestination"
           />
         </template>
       </file-list>
@@ -114,7 +109,6 @@ import {
 } from "@/utils/appNotifications";
 import { goToItemNotificationButton } from "@/utils/notificationActions";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
-import PathPickerButton from "@/components/files/PathPickerButton.vue";
 import ListingFilter from "@/components/files/ListingFilter.vue";
 import MoveCopyQuickDestinations from "@/components/prompts/MoveCopyQuickDestinations.vue";
 import MoveCopySummary from "@/components/prompts/MoveCopySummary.vue";
@@ -124,7 +118,7 @@ import { blockReasonMessage, moveCopyBlockReason, runInBatches } from "@/utils/m
 
 export default {
   name: "move-copy",
-  components: { FileList, LoadingSpinner, PathPickerButton, ListingFilter, MoveCopyQuickDestinations, MoveCopySummary },
+  components: { FileList, LoadingSpinner, ListingFilter, MoveCopyQuickDestinations, MoveCopySummary },
   props: {
     promptId: {
       type: [String, Number],
@@ -197,8 +191,15 @@ export default {
     blockMessage() {
       return blockReasonMessage(this.blockReason, (key) => this.$t(key));
     },
+    // With the single-click setting, a click opens a folder and the destination is the open folder
+    openFoldersOnClick() {
+      return Boolean(state.user?.singleClick);
+    },
+    destinationSources() {
+      return Object.keys(state.sources?.info || {});
+    },
     showDestSource() {
-      return !this.isShareContext && Object.keys(state.sources?.info || {}).length > 1;
+      return !this.isShareContext && this.destinationSources.length > 1;
     },
     blockMessageId() {
       return `move-copy-blocked-${this.promptId ?? "prompt"}`;
@@ -259,13 +260,18 @@ export default {
     }
   },
   methods: {
-    selectQuickDestination({ source, path }) {
+    // path null (switching source) means the folder the prompt started in for that source, else its root
+    selectDestination({ source, path }) {
       if (!source || this.isLoading) return;
       this.destSource = source;
-      this.destPath = normalizeDirPath(path);
-      void this.syncFileListFromPicker();
+      this.destPath = normalizeDirPath(path ?? this.startFolderIn(source));
+      void this.showDestinationInList();
     },
-    async syncFileListFromPicker() {
+    startFolderIn(source) {
+      if (source !== state.req?.source || !state.req?.path) return "/";
+      return this.initialBrowsePath || state.req.path;
+    },
+    async showDestinationInList() {
       this.destError = false; // FileList reports again once the new listing loads
       await this.$nextTick();
       if (this.$refs.fileList && this.destSource && this.destPath) {
@@ -551,6 +557,18 @@ export default {
 /* Make card-content position relative for absolute positioning of overlay */
 .card-content {
   position: relative;
+}
+
+.move-copy-browser {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* The list scrolls here rather than in the prompt, so its header sticks to the top edge */
+.move-copy-browser :deep(.sticky-header) {
+  top: 0;
 }
 
 .new-dir-input {

@@ -503,6 +503,7 @@
     "moveCopyIntoItself": "Karpeta bat ezin da bere barrura kopiatu edo eraman",
     "moveCopyNoPermission": "Ez duzu hemen elementuak gehitzeko baimenik",
     "moveCopyProgress": "{total}(e)tik {done} eginda",
+    "typeDestinationPath": "Idatzi bide-izen bat",
     "closeWithActiveUploads": "Igoera aktiboak",
     "closeWithActiveUploadsMessage": "Kontuz: igoera aktiboak dituzu, eta igoeren leihoa ixteak igoerak amaitu gabe uztea ekar dezake. Zer egin nahi duzu?",
     "basicInfo": "Oinarrizko informazioa",

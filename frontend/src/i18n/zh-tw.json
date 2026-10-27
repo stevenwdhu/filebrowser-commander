@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "無法將資料夾複製或移動到其本身之中",
     "moveCopyNoPermission": "您沒有在此處新增項目的權限",
     "moveCopyProgress": "已完成 {done}/{total}",
+    "typeDestinationPath": "輸入路徑",
     "closeWithActiveUploadsMessage": "警告：仍有上傳作業進行中，關閉上傳視窗可能導致部分上傳未完成。要怎麼做？",
     "closeWithActiveUploads": "進行中的上傳",
     "basicInfo": "基本資訊",

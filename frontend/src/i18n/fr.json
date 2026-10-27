@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Un dossier ne peut pas être copié ou déplacé dans lui-même",
     "moveCopyNoPermission": "Vous n'avez pas l'autorisation d'ajouter des éléments ici",
     "moveCopyProgress": "{done} sur {total} terminés",
+    "typeDestinationPath": "Saisir un chemin",
     "closeWithActiveUploadsMessage": "Attention : Vous avez des téléchargements actifs et la fermeture de l'invite de téléchargement pourrait entraîner des téléchargements inachevés. Que voulez-vous faire ?",
     "closeWithActiveUploads": "Téléchargements actifs",
     "basicInfo": "Informations de base",

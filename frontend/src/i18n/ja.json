@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "フォルダーをそれ自身の中にコピーまたは移動することはできません",
     "moveCopyNoPermission": "ここに項目を追加する権限がありません",
     "moveCopyProgress": "{total} 件中 {done} 件完了",
+    "typeDestinationPath": "パスを入力",
     "closeWithActiveUploadsMessage": "警告アクティブなアップロードがあり、アップロードプロンプトを閉じるとアップロードが未完了になる可能性があります。どうしますか？",
     "closeWithActiveUploads": "アクティブなアップロード",
     "basicInfo": "基本情報",

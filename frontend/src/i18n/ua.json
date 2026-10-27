@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "Папку не можна скопіювати або перемістити в саму себе",
     "moveCopyNoPermission": "У вас немає дозволу додавати сюди елементи",
     "moveCopyProgress": "Виконано {done} з {total}",
+    "typeDestinationPath": "Ввести шлях",
     "closeWithActiveUploadsMessage": "Попередження: У вас є активні завантаження, і закриття запиту на завантаження може призвести до незавершених завантажень. Що ви хочете зробити?",
     "closeWithActiveUploads": "Активні завантаження",
     "basicInfo": "Основна інформація",

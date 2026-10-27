@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "En mapp kan inte kopieras eller flyttas in i sig själv",
     "moveCopyNoPermission": "Du har inte behörighet att lägga till objekt här",
     "moveCopyProgress": "{done} av {total} klara",
+    "typeDestinationPath": "Skriv en sökväg",
     "closeWithActiveUploadsMessage": "Varning för uppladdning: Du har aktiva uppladdningar och om du stänger uppladdningsprompten kan det leda till oavslutade uppladdningar. Vad skulle du vilja göra?",
     "closeWithActiveUploads": "Aktiva uppladdningar",
     "basicInfo": "Grundläggande information",

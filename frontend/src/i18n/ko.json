@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "폴더를 자기 자신 안으로 복사하거나 이동할 수 없습니다",
     "moveCopyNoPermission": "여기에 항목을 추가할 권한이 없습니다",
     "moveCopyProgress": "{total}개 중 {done}개 완료",
+    "typeDestinationPath": "경로 입력",
     "closeWithActiveUploadsMessage": "경고: 업로드가 진행 중이며 업로드 프롬프트를 닫으면 완료되지 않은 업로드가 발생할 수 있습니다. 어떻게 하시겠습니까?",
     "closeWithActiveUploads": "활성 업로드",
     "basicInfo": "기본 정보",

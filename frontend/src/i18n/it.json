@@ -482,6 +482,7 @@
     "moveCopyIntoItself": "Una cartella non può essere copiata o spostata in se stessa",
     "moveCopyNoPermission": "Non hai il permesso di aggiungere elementi qui",
     "moveCopyProgress": "{done} di {total} completati",
+    "typeDestinationPath": "Digita un percorso",
     "closeWithActiveUploads": "Caricamenti attivi",
     "closeWithActiveUploadsMessage": "Attenzione: hai dei caricamenti attivi. Chiudere potrebbe interromperli. Cosa vuoi fare?",
     "basicInfo": "Informazioni di base",

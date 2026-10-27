@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "לא ניתן להעתיק או להעביר תיקייה לתוך עצמה",
     "moveCopyNoPermission": "אין לך הרשאה להוסיף פריטים כאן",
     "moveCopyProgress": "הושלמו {done} מתוך {total}",
+    "typeDestinationPath": "הקלד נתיב",
     "closeWithActiveUploadsMessage": "אזהרה: יש לך העלאות פעילות וסגירת חלון ההעלאה עלולה לגרום להשלמת העלאות לא גמורות. מה ברצונך לעשות?",
     "closeWithActiveUploads": "העלאות פעילות",
     "basicInfo": "מידע בסיסי",

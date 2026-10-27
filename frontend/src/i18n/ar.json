@@ -214,6 +214,7 @@
     "moveCopyIntoItself": "لا يمكن نسخ مجلد أو نقله إلى داخل نفسه",
     "moveCopyNoPermission": "ليس لديك إذن لإضافة عناصر هنا",
     "moveCopyProgress": "اكتمل {done} من {total}",
+    "typeDestinationPath": "اكتب مسارًا",
     "closeWithActiveUploadsMessage": "تحذير: لديك تحميلات نشطة وقد يؤدي إغلاق مطالبة التحميل إلى تحميلات غير مكتملة. ماذا تريد أن تفعل؟",
     "closeWithActiveUploads": "التحميلات النشطة",
     "basicInfo": "معلومات أساسية",
