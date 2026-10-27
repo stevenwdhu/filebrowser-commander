@@ -73,7 +73,9 @@
     "open": "Otvoriť",
     "openInOtherPane": "Otvoriť v druhom paneli",
     "showInOtherPane": "Zobraziť tento priečinok v druhom paneli",
-    "swapPanes": "Vymeniť panely"
+    "swapPanes": "Vymeniť panely",
+    "copyToOtherPane": "Kopírovať do druhého panela",
+    "moveToOtherPane": "Presunúť do druhého panela"
   },
   "help": {
     "functionKeys": "Funkčné Klávesy",

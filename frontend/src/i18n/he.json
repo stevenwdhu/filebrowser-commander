@@ -73,7 +73,9 @@
     "open": "פתח",
     "openInOtherPane": "פתח בחלונית השנייה",
     "showInOtherPane": "הצג תיקייה זו בחלונית השנייה",
-    "swapPanes": "החלף חלוניות"
+    "swapPanes": "החלף חלוניות",
+    "copyToOtherPane": "העתק לחלונית השנייה",
+    "moveToOtherPane": "העבר לחלונית השנייה"
   },
   "help": {
     "functionKeys": "מקשי פונקציה",

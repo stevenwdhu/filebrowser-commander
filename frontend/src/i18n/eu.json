@@ -246,7 +246,9 @@
     "open": "Ireki",
     "openInOtherPane": "Ireki beste panelean",
     "showInOtherPane": "Erakutsi karpeta hau beste panelean",
-    "swapPanes": "Trukatu panelak"
+    "swapPanes": "Trukatu panelak",
+    "copyToOtherPane": "Kopiatu beste panelera",
+    "moveToOtherPane": "Eraman beste panelera"
   },
   "help": {
     "functionKeys": "Funtzio-teklak",

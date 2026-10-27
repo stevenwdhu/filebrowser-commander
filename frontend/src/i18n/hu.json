@@ -73,7 +73,9 @@
     "open": "Megnyitás",
     "openInOtherPane": "Megnyitás a másik panelen",
     "showInOtherPane": "Mappa megjelenítése a másik panelen",
-    "swapPanes": "Panelek felcserélése"
+    "swapPanes": "Panelek felcserélése",
+    "copyToOtherPane": "Másolás a másik panelre",
+    "moveToOtherPane": "Áthelyezés a másik panelre"
   },
   "help": {
     "functionKeys": "Funkcióbillentyűk",

@@ -73,7 +73,9 @@
     "open": "열기",
     "openInOtherPane": "다른 창에서 열기",
     "showInOtherPane": "이 폴더를 다른 창에 표시",
-    "swapPanes": "창 바꾸기"
+    "swapPanes": "창 바꾸기",
+    "copyToOtherPane": "다른 창으로 복사",
+    "moveToOtherPane": "다른 창으로 이동"
   },
   "help": {
     "functionKeys": "기능 키",

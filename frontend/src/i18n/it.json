@@ -246,7 +246,9 @@
     "open": "Apri",
     "openInOtherPane": "Apri nell'altro pannello",
     "showInOtherPane": "Mostra questa cartella nell'altro pannello",
-    "swapPanes": "Scambia pannelli"
+    "swapPanes": "Scambia pannelli",
+    "copyToOtherPane": "Copia nell'altro pannello",
+    "moveToOtherPane": "Sposta nell'altro pannello"
   },
   "help": {
     "functionKeys": "Tasti funzione",

@@ -24,6 +24,7 @@
     <div v-show="!isLoading" class="move-copy-browser">
       <file-list
         ref="fileList"
+        :browse-source="startDestination ? startDestination.source : null"
         :browse-path="initialBrowsePath"
         :hide-path-chrome="!isShareContext"
         :open-on-click="openFoldersOnClick"
@@ -115,6 +116,7 @@ import MoveCopySummary from "@/components/prompts/MoveCopySummary.vue";
 import { eventBus } from '@/store/eventBus';
 import { normalizeDirPath, recordRecentDestination } from "@/utils/moveCopyDestinations";
 import { blockReasonMessage, moveCopyBlockReason, runInBatches } from "@/utils/moveCopyPlan";
+import { otherPaneDestination } from "@/store/dualPane.js";
 
 export default {
   name: "move-copy",
@@ -138,6 +140,11 @@ export default {
       type: Array,
       default: null,
     },
+    // { source, path } to start in, e.g. the other pane; with both panes shown that is the default
+    destination: {
+      type: Object,
+      default: null,
+    },
   },
   data: () => ({
     current: window.location.pathname,
@@ -150,10 +157,14 @@ export default {
     newDirName: "",
     filterQuery: "",
     progress: null, // { done, total, current } while items are being copied/moved
+    startDestination: null, // Folder the picker opens in, when not the current one
   }),
   computed: {
     // From a file preview, start in the file's folder rather than at the file itself
     initialBrowsePath() {
+      if (this.startDestination) {
+        return this.startDestination.path;
+      }
       const req = state.req;
       if (!req?.type || req.type === "directory" || !req.path) {
         return null;
@@ -216,6 +227,14 @@ export default {
       return getters.isShare();
     },
   },
+  created() {
+    const start = this.destination?.source ? this.destination : otherPaneDestination(this.items);
+    if (start) {
+      this.startDestination = { source: start.source, path: normalizeDirPath(start.path) };
+      this.destSource = this.startDestination.source;
+      this.destPath = this.startDestination.path;
+    }
+  },
   mounted() {
     // If props.items is provided, use it. Otherwise use state
     if (this.items && this.items.length > 0) {
@@ -268,8 +287,10 @@ export default {
       void this.showDestinationInList();
     },
     startFolderIn(source) {
+      if (this.startDestination?.source === source) return this.startDestination.path;
       if (source !== state.req?.source || !state.req?.path) return "/";
-      return this.initialBrowsePath || state.req.path;
+      // The listing's folder, or a previewed file's folder
+      return state.req.type === "directory" ? state.req.path : normalizeDirPath(url.removeLastDir(state.req.path));
     },
     async showDestinationInList() {
       this.destError = false; // FileList reports again once the new listing loads

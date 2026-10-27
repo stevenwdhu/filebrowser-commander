@@ -73,7 +73,9 @@
     "open": "Openen",
     "openInOtherPane": "Openen in ander paneel",
     "showInOtherPane": "Deze map in het andere paneel tonen",
-    "swapPanes": "Panelen omwisselen"
+    "swapPanes": "Panelen omwisselen",
+    "copyToOtherPane": "Kopiëren naar ander paneel",
+    "moveToOtherPane": "Verplaatsen naar ander paneel"
   },
   "help": {
     "functionKeys": "Functietoetsen",

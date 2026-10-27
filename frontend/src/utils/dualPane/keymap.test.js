@@ -99,6 +99,20 @@ describe("resolveDualPaneKey", () => {
     expect(key({ key: "ArrowDown", repeat: true })).toEqual({ cmd: "cursor", args: { step: 1, extend: false, rows: true } });
   });
 
+  it("copies and moves to the other pane with F5 and F6 from either pane", () => {
+    expect(key({ key: "F5" }, { active: "left" })).toEqual({ cmd: "copyToOther" });
+    expect(key({ key: "F6" })).toEqual({ cmd: "moveToOther" });
+    expect(key({ key: "F5", ctrlKey: true })).toBeNull(); // hard reload stays
+    expect(key({ key: "F5" }, { shown: false })).toBeNull();
+    // Never a page reload behind the prompt that F5 opened
+    expect(key({ key: "F5", repeat: true })).toEqual({ cmd: "noop" });
+    expect(key({ key: "F5" }, { promptOpen: true })).toEqual({ cmd: "noop" });
+    expect(key({ key: "F5" }, { promptOpen: true, shown: false })).toBeNull();
+    expect(key({ key: "F6" }, {}, element("<input>"))).toEqual({ cmd: "noop" });
+    const menuItem = element('<div class="dual-pane-menu"><button>Open</button></div>', "button");
+    expect(key({ key: "F5" }, { menuOpen: true }, menuItem)).toEqual({ cmd: "copyToOther" });
+  });
+
   it("keeps keys inside the pane menu", () => {
     expect(key({ key: "Escape" }, { menuOpen: true })).toEqual({ cmd: "closeMenu" });
     expect(key({ key: "Tab" }, { menuOpen: true })).toEqual({ cmd: "closeMenu" });

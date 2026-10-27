@@ -40,6 +40,8 @@
           :showLimitedOptions="true"
           :class="{ 'zebra-row': (index - stripeOffset) % 2 === 1, 'dual-pane-cursor': entry.path === right.cursor }"
           :data-path="entry.path"
+          :draggable="entry.isParent ? 'false' : 'true'"
+          @dragstart="startRightDrag(entry, $event)"
           @pointerdown="lastPointerType = $event.pointerType"
           @click.prevent="onRowClick(entry, $event)"
           @dblclick.prevent="openEntry(entry)"
@@ -67,6 +69,7 @@ import ListingItem from "@/components/files/ListingItem.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import { dualPane, rightSelection, rightViewMode, setActivePane } from "@/store/dualPane.js";
 import { openEntry } from "@/utils/dualPane/commands.js";
+import { startRightDrag } from "@/utils/dualPane/dragDrop.js";
 import { paneColumns, paneItemStyles } from "@/utils/dualPane/paneLayout.js";
 import { isParentEntry } from "@/utils/dualPane/paneModel.js";
 
@@ -144,6 +147,7 @@ export default {
   },
   methods: {
     openEntry,
+    startRightDrag,
     focus() {
       this.$refs.list?.focus({ preventScroll: true });
     },

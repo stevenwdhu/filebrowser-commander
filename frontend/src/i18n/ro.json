@@ -73,7 +73,9 @@
     "open": "Deschide",
     "openInOtherPane": "Deschide în celălalt panou",
     "showInOtherPane": "Afișează acest dosar în celălalt panou",
-    "swapPanes": "Inversează panourile"
+    "swapPanes": "Inversează panourile",
+    "copyToOtherPane": "Copiază în celălalt panou",
+    "moveToOtherPane": "Mută în celălalt panou"
   },
   "help": {
     "functionKeys": "Taste Funcție",

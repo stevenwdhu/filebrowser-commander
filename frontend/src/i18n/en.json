@@ -246,7 +246,9 @@
     "open": "Open",
     "openInOtherPane": "Open in other pane",
     "showInOtherPane": "Show this folder in the other pane",
-    "swapPanes": "Swap panes"
+    "swapPanes": "Swap panes",
+    "copyToOtherPane": "Copy to other pane",
+    "moveToOtherPane": "Move to other pane"
   },
   "help": {
     "functionKeys": "Function Keys",

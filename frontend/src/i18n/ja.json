@@ -73,7 +73,9 @@
     "open": "開く",
     "openInOtherPane": "もう一方のペインで開く",
     "showInOtherPane": "このフォルダーをもう一方のペインに表示",
-    "swapPanes": "ペインを入れ替え"
+    "swapPanes": "ペインを入れ替え",
+    "copyToOtherPane": "もう一方のペインにコピー",
+    "moveToOtherPane": "もう一方のペインに移動"
   },
   "help": {
     "functionKeys": "ファンクションキー",

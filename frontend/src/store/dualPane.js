@@ -48,6 +48,7 @@ export const dualPane = reactive({
   wideEnough: true,
   shown: false, // Set by DualPaneHost while the pane is on screen
   menu: null, // { x, y, onEntry } while the right pane's menu is open
+  drag: null, // { origin: "left" | "right" } while items are dragged from a pane
   right: emptyRight(),
 });
 
@@ -310,6 +311,20 @@ export function activePaneContext() {
 
 export function otherPaneContext() {
   return paneContext(dualPane.active === "right" ? "left" : "right");
+}
+
+/**
+ * Where a copy or move of these items should start while both panes are on screen: the pane they
+ * are not in. Null when the second pane isn't shown.
+ */
+export function otherPaneDestination(items) {
+  const right = dualPane.right;
+  if (!dualPane.shown || !right.source || right.error) return null;
+  const first = items?.[0];
+  const fromRight = Boolean(first) && first.source === right.source && parentDir(first.path) === right.path;
+  if (!fromRight) return { source: right.source, path: right.path };
+  const left = leftLocation();
+  return left.source ? left : null;
 }
 
 /** Which pane an element belongs to, or null for the header, sidebar and prompts. */

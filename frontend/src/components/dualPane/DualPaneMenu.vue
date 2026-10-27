@@ -20,6 +20,7 @@
     >
       <i class="material-symbols" aria-hidden="true">{{ entry.icon }}</i>
       <span>{{ entry.label }}</span>
+      <kbd v-if="entry.shortcut" class="dual-pane-menu-shortcut">{{ entry.shortcut }}</kbd>
     </button>
   </div>
 </template>
@@ -59,6 +60,8 @@ export default {
       return [
         single && { id: "open", icon: isDir ? "folder_open" : "open_in_new", label: t("dualPane.open") },
         isDir && { id: "openInOther", icon: "dock_to_right", label: t("dualPane.openInOtherPane") },
+        targets.length > 0 && this.permissions.download && { id: "copyToOther", icon: "content_copy", label: t("dualPane.copyToOtherPane"), shortcut: "F5" },
+        targets.length > 0 && this.permissions.modify && { id: "moveToOther", icon: "move", label: t("dualPane.moveToOtherPane"), shortcut: "F6" },
         single && this.permissions.modify && { id: "rename", icon: "edit", label: t("general.rename") },
         targets.length > 0 && this.permissions.delete && { id: "delete", icon: "delete", label: t("general.delete") },
         targets.length > 0 && this.permissions.download && { id: "download", icon: "file_download", label: t("general.download") },

@@ -73,7 +73,9 @@
     "open": "Abrir",
     "openInOtherPane": "Abrir no outro painel",
     "showInOtherPane": "Mostrar esta pasta no outro painel",
-    "swapPanes": "Trocar painéis"
+    "swapPanes": "Trocar painéis",
+    "copyToOtherPane": "Copiar para o outro painel",
+    "moveToOtherPane": "Mover para o outro painel"
   },
   "help": {
     "functionKeys": "Teclas de Função",

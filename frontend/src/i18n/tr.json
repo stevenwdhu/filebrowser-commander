@@ -73,7 +73,9 @@
     "open": "Aç",
     "openInOtherPane": "Diğer panelde aç",
     "showInOtherPane": "Bu klasörü diğer panelde göster",
-    "swapPanes": "Panelleri değiştir"
+    "swapPanes": "Panelleri değiştir",
+    "copyToOtherPane": "Diğer panele kopyala",
+    "moveToOtherPane": "Diğer panele taşı"
   },
   "help": {
     "functionKeys": "Fonksiyon Tuşları",

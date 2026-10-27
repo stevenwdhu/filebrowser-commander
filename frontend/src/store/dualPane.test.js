@@ -22,6 +22,7 @@ import {
   initDualPane,
   openRight,
   otherPaneContext,
+  otherPaneDestination,
   paneContext,
   refreshRight,
   rightSelection,
@@ -152,6 +153,16 @@ describe("dual-pane store", () => {
     expect(dualPane.right).toMatchObject({ source: "tank", path: "/docs/", loaded: true });
     expect(dualPane.right.entries.map((entry) => entry.name)).toEqual(["..", "a.txt"]);
     expect(JSON.parse(localStorage.getItem(`dualPane_user${user}`))).toMatchObject({ enabled: true, right: { source: "tank", path: "/docs/" } });
+  });
+
+  it("starts a copy or move in the pane the items are not in", async () => {
+    store().req = { source: "tank", path: "/docs/", type: "directory", items: [] };
+    api.fetchFiles.mockResolvedValue(folder("/x/", ["one.txt"]));
+    await openRight("backup", "/x/");
+    expect(otherPaneDestination([{ source: "tank", path: "/docs/a.txt" }])).toEqual({ source: "backup", path: "/x/" });
+    expect(otherPaneDestination([{ source: "backup", path: "/x/one.txt" }])).toEqual({ source: "tank", path: "/docs/" });
+    dualPane.shown = false;
+    expect(otherPaneDestination([{ source: "tank", path: "/docs/a.txt" }])).toBeNull();
   });
 
   it("describes each pane's folder and the items an operation would use", async () => {

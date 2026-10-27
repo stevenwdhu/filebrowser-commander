@@ -46,15 +46,17 @@ vi.mock("@/components/files/ListingFilter.vue", () => ({ default: { render: () =
 vi.mock("@/components/files/FileList.vue", () => ({
   default: {
     name: "FileList",
-    props: { browsePath: String, openOnClick: Boolean },
+    props: { browsePath: String, browseSource: String, openOnClick: Boolean },
     methods: { jumpTo },
     render() {
       fileListProps.browsePath = this.browsePath;
+      fileListProps.browseSource = this.browseSource;
       fileListProps.openOnClick = this.openOnClick;
       return h("div", this.$slots.sticky?.());
     },
   },
 }));
+import { dualPane } from "@/store/dualPane.js";
 import MoveCopy from "./MoveCopy.vue";
 
 let app, root;
@@ -231,6 +233,37 @@ describe("MoveCopy summary", () => {
     expect(text("move-copy-destination")).toBeNull();
     expect(text("move-copy-blocked")).toBeNull();
     expect(actionButton("move").hasAttribute("aria-describedby")).toBe(false);
+  });
+
+  it("starts in a given destination, or in the other pane while both are shown", async () => {
+    mount("copy", [folder("/photos/")], { destination: { source: "backup", path: "/archive" } });
+    await nextTick();
+    expect([fileListProps.browseSource, fileListProps.browsePath]).toEqual(["backup", "/archive/"]);
+    expect(destination()).toEqual({ source: "backup", path: "/archive/" });
+    app.unmount();
+
+    Object.assign(dualPane, { shown: true });
+    Object.assign(dualPane.right, { source: "backup", path: "/inbox/", error: false });
+    mount("copy", [folder("/photos/")]);
+    await nextTick();
+    expect([fileListProps.browseSource, fileListProps.browsePath]).toEqual(["backup", "/inbox/"]);
+    Object.assign(dualPane, { shown: false });
+  });
+
+  it("goes back to the other pane's folder, or the listing's, when the source is switched back", async () => {
+    state.req = { source: "tank", path: "/photos/", type: "directory", items: [] };
+    mount("copy", [folder("/photos/a/")], { destination: { source: "backup", path: "/inbox/" } });
+    await nextTick();
+    const select = root.querySelector('[data-testid="move-copy-destination-source"]');
+    const switchTo = async (source) => {
+      select.value = source;
+      select.dispatchEvent(new Event("change"));
+      await nextTick();
+    };
+    await switchTo("tank");
+    expect(jumpTo).toHaveBeenLastCalledWith("tank", "/photos/");
+    await switchTo("backup");
+    expect(jumpTo).toHaveBeenLastCalledWith("backup", "/inbox/");
   });
 
   it("starts in the folder of a previewed file and only names the source when there are several", async () => {

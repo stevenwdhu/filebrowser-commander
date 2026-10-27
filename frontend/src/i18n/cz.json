@@ -73,7 +73,9 @@
     "open": "Otevřít",
     "openInOtherPane": "Otevřít v druhém panelu",
     "showInOtherPane": "Zobrazit tuto složku v druhém panelu",
-    "swapPanes": "Prohodit panely"
+    "swapPanes": "Prohodit panely",
+    "copyToOtherPane": "Kopírovat do druhého panelu",
+    "moveToOtherPane": "Přesunout do druhého panelu"
   },
   "help": {
     "functionKeys": "Funkční Klávesy",

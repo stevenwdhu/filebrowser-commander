@@ -73,7 +73,9 @@
     "open": "Öffnen",
     "openInOtherPane": "Im anderen Bereich öffnen",
     "showInOtherPane": "Diesen Ordner im anderen Bereich anzeigen",
-    "swapPanes": "Bereiche tauschen"
+    "swapPanes": "Bereiche tauschen",
+    "copyToOtherPane": "In den anderen Bereich kopieren",
+    "moveToOtherPane": "In den anderen Bereich verschieben"
   },
   "help": {
     "functionKeys": "Funktionstasten",

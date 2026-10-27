@@ -4,6 +4,7 @@
 import { getters, mutations, state } from "@/store/index.ts";
 import { resourcesApi } from "@/api/index.js";
 import { notify } from "@/notify/index.ts";
+import i18n from "@/i18n/index.ts";
 import { router } from "@/router/index.ts";
 import { buildItemUrl, goToItem } from "@/utils/url.js";
 import { processTypeAheadKey, resetTypeAheadSession } from "@/utils/listingTypeAhead.js";
@@ -11,8 +12,10 @@ import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
 import { closestInDirection, isCardMode } from "@/utils/dualPane/paneLayout.js";
 import { childName, isParentEntry, operationTargets, parentDir } from "@/utils/dualPane/paneModel.js";
 import {
+  activePaneContext,
   dualPane,
   openRight,
+  otherPaneContext,
   paneContext,
   refreshRight,
   rightSelection,
@@ -120,6 +123,33 @@ export function openEntry(entry, { newTab = false } = {}) {
   };
   openedFromRight.item = previous;
   goToItem(entry.source, entry.path, previous, false, false);
+}
+
+// The server refuses a move without modify, or a copy without download, on the items' source
+function mayTransfer(operation, source) {
+  const perms = getters.sourcePermissions(source) || {};
+  return operation === "move" ? Boolean(perms.modify) : Boolean(perms.download);
+}
+
+/** Open the copy or move prompt for items, starting in the given folder. */
+export function transfer(operation, items, destination) {
+  if (items.length === 0 || !destination?.source) return;
+  if (!mayTransfer(operation, items[0].source)) {
+    notify.showErrorToast(i18n.global.t("errors.forbidden"));
+    return;
+  }
+  mutations.showPrompt({
+    name: operation,
+    props: { operation, items, destination: { source: destination.source, path: normalizeDirPath(destination.path) } },
+  });
+}
+
+// F5 / F6: the active pane's selection (or the right pane's cursor row) into the other pane's folder
+function transferToOther(operation) {
+  dualPane.menu = null; // F5/F6 also work from the right pane's menu
+  const from = activePaneContext();
+  const to = otherPaneContext();
+  transfer(operation, from.items, { source: to.source, path: to.path });
 }
 
 function deleteItems() {
@@ -262,6 +292,8 @@ export const dualPaneCommands = {
   openInOther,
   showInOther,
   swapPanes,
+  copyToOther: () => transferToOther("copy"),
+  moveToOther: () => transferToOther("move"),
   cursor: ({ step, extend, rows }) => (rows && moveByRows(step, extend)) || rightSelection.move(step, { extend }),
   page: ({ direction, extend }) => moveByRows(direction, extend, { page: true }) || rightSelection.move(direction * pageSize(), { extend }),
   open: () => openEntry(rightEntry()),

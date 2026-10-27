@@ -73,7 +73,9 @@
     "open": "開啟",
     "openInOtherPane": "在另一個窗格中開啟",
     "showInOtherPane": "在另一個窗格中顯示此資料夾",
-    "swapPanes": "交換窗格"
+    "swapPanes": "交換窗格",
+    "copyToOtherPane": "複製到另一個窗格",
+    "moveToOtherPane": "移動到另一個窗格"
   },
   "help": {
     "functionKeys": "功能鍵",

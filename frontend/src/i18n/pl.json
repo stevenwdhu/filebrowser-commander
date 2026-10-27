@@ -73,7 +73,9 @@
     "open": "Otwórz",
     "openInOtherPane": "Otwórz w drugim panelu",
     "showInOtherPane": "Pokaż ten folder w drugim panelu",
-    "swapPanes": "Zamień panele"
+    "swapPanes": "Zamień panele",
+    "copyToOtherPane": "Kopiuj do drugiego panelu",
+    "moveToOtherPane": "Przenieś do drugiego panelu"
   },
   "help": {
     "functionKeys": "Klawisze Funkcji",

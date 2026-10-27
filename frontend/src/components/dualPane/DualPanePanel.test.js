@@ -151,6 +151,8 @@ describe("DualPanePanel", () => {
     const labels = () => [...document.querySelectorAll(".dual-pane-menu-item")].map((el) => el.textContent.trim());
     expect(labels()).toEqual([
       "open_in_newdualPane.open",
+      "content_copydualPane.copyToOtherPaneF5",
+      "movedualPane.moveToOtherPaneF6",
       "editgeneral.rename",
       "deletegeneral.delete",
       "file_downloadgeneral.download",

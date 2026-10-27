@@ -73,7 +73,9 @@
     "open": "فتح",
     "openInOtherPane": "فتح في اللوحة الأخرى",
     "showInOtherPane": "إظهار هذا المجلد في اللوحة الأخرى",
-    "swapPanes": "تبديل اللوحتين"
+    "swapPanes": "تبديل اللوحتين",
+    "copyToOtherPane": "نسخ إلى اللوحة الأخرى",
+    "moveToOtherPane": "نقل إلى اللوحة الأخرى"
   },
   "help": {
     "functionKeys": "مفاتيح الوظائف",

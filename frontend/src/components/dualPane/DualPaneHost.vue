@@ -46,6 +46,9 @@ import {
 } from "@/store/dualPane.js";
 import { leftNavigation, locationKey, openedFromRight, runDualPaneCommand } from "@/utils/dualPane/commands.js";
 import { resolveDualPaneKey } from "@/utils/dualPane/keymap.js";
+import { paneDragHandlers } from "@/utils/dualPane/dragDrop.js";
+
+const DRAG_EVENTS = ["dragstart", "dragenter", "dragover", "drop", "dragend"];
 
 // Below this width for the two panes together (after a sticky sidebar) only one is shown
 const MIN_PANES_WIDTH = 640;
@@ -158,6 +161,14 @@ export default {
     window.addEventListener("paste", this.onPaste, true);
     window.addEventListener("resize", this.onResize);
     document.addEventListener("pointerdown", this.onPointerDown, true);
+    this.dragListeners = DRAG_EVENTS.map((type) => {
+      // A drag can end after the pane was hidden; always clear its state then
+      const listener = (event) => {
+        if (this.shown || type === "dragend") paneDragHandlers[type](event);
+      };
+      document.addEventListener(type, listener, true);
+      return [type, listener];
+    });
   },
   beforeUnmount() {
     this.stopUserWatch?.();
@@ -170,6 +181,9 @@ export default {
     window.removeEventListener("paste", this.onPaste, true);
     window.removeEventListener("resize", this.onResize);
     document.removeEventListener("pointerdown", this.onPointerDown, true);
+    for (const [type, listener] of this.dragListeners || []) {
+      document.removeEventListener(type, listener, true);
+    }
     cancelAnimationFrame(this.resizeFrame);
     clearTimeout(this.resizeTimer);
     dualPane.shown = false;

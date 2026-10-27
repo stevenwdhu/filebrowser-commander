@@ -40,6 +40,8 @@ describe("upstream contract for the dual pane", () => {
     expect(ListingItem).not.toMatch(/\n {2}emits:/);
     expect(ListingItem).toContain(':data-index="index"');
     expect(ListingItem).toContain(':data-name="name"');
+    // Pane drag and drop finds folder rows by these
+    expect(ListingItem).toContain(':data-dir="isDir"');
     expect(ListingItem).toContain("application/x-filebrowser-internal-drag");
     // DualPaneHost watches state.reload synchronously because Files.vue resets it straight away
     expect(Files).toContain("mutations.setReload(false)");

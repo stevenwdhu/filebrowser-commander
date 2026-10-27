@@ -320,6 +320,22 @@ html.dual-pane-resizing .dual-pane-divider {
   font-size: 1.25em;
 }
 
+.dual-pane-menu-shortcut {
+  margin-left: auto;
+  padding-left: 1.5em;
+  color: var(--textSecondary);
+  font-family: inherit;
+  font-size: 0.85em;
+}
+
+/* Where a drag from the other pane would land */
+.listing-item.dual-pane-drop-target,
+.dual-pane-list.dual-pane-drop-target,
+#main.dual-pane-drop-target {
+  outline: 2px dashed var(--primaryColor);
+  outline-offset: -4px;
+}
+
 /* Header toggle: auto margins keep the search bar centred in the space-between header */
 header.flexbar > .dual-pane-toggle {
   margin-left: auto;

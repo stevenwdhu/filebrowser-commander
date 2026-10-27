@@ -73,7 +73,9 @@
     "open": "Ouvrir",
     "openInOtherPane": "Ouvrir dans l'autre panneau",
     "showInOtherPane": "Afficher ce dossier dans l'autre panneau",
-    "swapPanes": "Échanger les panneaux"
+    "swapPanes": "Échanger les panneaux",
+    "copyToOtherPane": "Copier dans l'autre panneau",
+    "moveToOtherPane": "Déplacer dans l'autre panneau"
   },
   "help": {
     "functionKeys": "Touches de Fonction",
