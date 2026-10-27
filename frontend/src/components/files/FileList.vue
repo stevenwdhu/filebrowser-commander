@@ -170,6 +170,7 @@ export default {
       current: window.location.pathname,
       currentSource: initialSource,
       loading: false,
+      loadRequestId: 0, // Bumped per listing request; see withLoading()
       headerHidden: false,
       lastScrollTop: 0,
       scrollContainer: null,
@@ -303,7 +304,7 @@ export default {
     } else if (this.browseShare || getters.isShare()) {
       const hash = this.browseShare || getters.shareHash();
       const startPath = this.browseShare ? "/" : this.path;
-      this.withLoading(() => resourcesApi.fetchFilesPublic(startPath, hash).then(this.fillOptions));
+      this.withLoading(() => resourcesApi.fetchFilesPublic(startPath, hash));
     } else {
       // Normal browse mode: fetch files
       const sourceToUse = this.currentSource;
@@ -316,7 +317,7 @@ export default {
       // Fetch the initial data for the source
       // Always fetch if browsing a different source or if browsePath was specified
       if (this.currentSource !== state.req.source || this.browsePath) {
-        this.withLoading(() => resourcesApi.fetchFiles(sourceToUse, pathToUse).then(this.fillOptions));
+        this.withLoading(() => resourcesApi.fetchFiles(sourceToUse, pathToUse));
       } else {
         this.fillOptions(initialReq);
       }
@@ -332,13 +333,21 @@ export default {
     this.stopFollowingCurrentItem?.();
   },
   methods: {
-    // Helper method to ensure loading spinner shows for minimum 200ms
-    async withLoading(operation) {
+    // Helper method to ensure loading spinner shows for minimum 200ms.
+    // Only the latest request fills the list, so overlapping navigations can't mix their responses.
+    async withLoading(fetchListing) {
+      const requestId = ++this.loadRequestId;
       const startTime = Date.now();
       this.loading = true;
       try {
-        await operation();
+        const req = await fetchListing();
+        if (requestId === this.loadRequestId) {
+          this.fillOptions(req);
+        }
       } catch (error) {
+        if (requestId !== this.loadRequestId) {
+          return;
+        }
         // Handle fetch errors gracefully
         // Note: API methods already show error notifications, so we don't need to show another one
         console.error('FileList fetch error:', error);
@@ -365,7 +374,9 @@ export default {
         const elapsed = Date.now() - startTime;
         const remaining = Math.max(0, 200 - elapsed);
         await new Promise(resolve => setTimeout(resolve, remaining));
-        this.loading = false;
+        if (requestId === this.loadRequestId) {
+          this.loading = false;
+        }
       }
     },
     // Check if file matches allowed file types
@@ -400,7 +411,7 @@ export default {
       this.selectedSource = null;
       this.selectedType = null;
       // Fetch files for the new source
-      void this.withLoading(() => resourcesApi.fetchFiles(newSource, newPath).then(this.fillOptions));
+      void this.withLoading(() => resourcesApi.fetchFiles(newSource, newPath));
     },
     resetToShare(newHash) {
       // Reset to the share root
@@ -411,7 +422,7 @@ export default {
       this.selectedSource = null;
       this.selectedType = null;
       // Fetch files for the share
-      void this.withLoading(() => resourcesApi.fetchFilesPublic("/", newHash).then(this.fillOptions));
+      void this.withLoading(() => resourcesApi.fetchFilesPublic("/", newHash));
     },
     fillOptions(req) {
       // Sets the current path and resets the current items.
@@ -506,14 +517,14 @@ export default {
       if (this.browseSource) {
         // Explicitly browsing a source - use files API
         this.source = sourceToUse;
-        void this.withLoading(() => resourcesApi.fetchFiles(sourceToUse, path).then(this.fillOptions));
+        void this.withLoading(() => resourcesApi.fetchFiles(sourceToUse, path));
       } else if (this.browseShare || getters.isShare()) {
         // Browsing a share - use public API
         const hashToUse = this.browseShare || getters.shareHash();
-        void this.withLoading(() => resourcesApi.fetchFilesPublic(path, hashToUse).then(this.fillOptions));
+        void this.withLoading(() => resourcesApi.fetchFilesPublic(path, hashToUse));
       } else {
         this.source = sourceToUse;
-        void this.withLoading(() => resourcesApi.fetchFiles(sourceToUse, path).then(this.fillOptions));
+        void this.withLoading(() => resourcesApi.fetchFiles(sourceToUse, path));
       }
 
     },
@@ -652,9 +663,9 @@ export default {
       this.selectedType = null;
       if (this.browseShare || getters.isShare()) {
         const hashToUse = this.browseShare || getters.shareHash();
-        void this.withLoading(() => resourcesApi.fetchFilesPublic(p, hashToUse).then(this.fillOptions));
+        void this.withLoading(() => resourcesApi.fetchFilesPublic(p, hashToUse));
       } else {
-        void this.withLoading(() => resourcesApi.fetchFiles(source, p).then(this.fillOptions));
+        void this.withLoading(() => resourcesApi.fetchFiles(source, p));
       }
     },
     fillFromList() {
