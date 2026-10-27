@@ -1,0 +1,331 @@
+/* Dual-pane layout. Everything that changes the app's own layout is keyed on html.dual-pane, which
+   DualPaneHost sets only while the second pane is on screen, together with --dual-pane-width. */
+
+/* Set inline on <html> by DualPaneHost */
+:root {
+  --dual-pane-width: 0px;
+}
+
+/* Left pane: the normal listing, narrowed */
+html.dual-pane #main {
+  width: calc(100% - var(--dual-pane-width));
+}
+
+html.dual-pane #shelf,
+html.dual-pane #status-bar {
+  right: var(--dual-pane-width);
+}
+
+/* The listing's scrollbar thumb is fixed to the viewport edge; keep it, hidden, inside the left pane */
+html.dual-pane #main .thumb {
+  right: calc(var(--dual-pane-width) + 0.25em);
+}
+
+html.dual-pane #main .thumb:not(.visible) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.dual-pane #main .thumb-section-id {
+  right: calc(var(--dual-pane-width) + 3em);
+}
+
+html.dual-pane-resizing,
+html.dual-pane-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+  transition: none !important;
+}
+
+/* Right pane */
+.dual-pane-right {
+  --listing-col-gap: 0.5rem;
+  --listing-col-size: 5rem;
+  --listing-col-modified: 8.5rem;
+
+  position: fixed;
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: var(--dual-pane-width);
+  padding-right: var(--safe-area-right);
+  border-left: 1px solid var(--divider);
+  background: var(--background);
+}
+
+.dual-pane-pathbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.25em;
+  min-height: 2.75em;
+  padding: 0.25em 0.5em;
+  border-top: 2px solid transparent;
+  border-bottom: 1px solid var(--divider);
+}
+
+.dual-pane-right.is-active .dual-pane-pathbar {
+  border-top-color: var(--primaryColor);
+}
+
+.dual-pane-pathbar button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.25em;
+  min-height: 2em;
+  padding: 0 0.4em;
+  border: 0;
+  border-radius: var(--borderRadius);
+  background: none;
+  color: var(--textPrimary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dual-pane-pathbar button:disabled {
+  opacity: 0.4;
+}
+
+.dual-pane-pathbar button:focus-visible {
+  outline: 2px solid var(--primaryColor);
+  outline-offset: -2px;
+}
+
+.dual-pane-pathbar button:hover:not(:disabled) {
+  background: var(--hoverOverlay);
+  transform: none;
+}
+
+.dual-pane-pathbar .material-symbols {
+  font-size: 1.25em;
+}
+
+.dual-pane-pathbar-source {
+  border: 1px solid var(--divider) !important;
+  font-weight: 500;
+}
+
+.dual-pane-pathbar-source .material-symbols {
+  color: var(--primaryColor);
+}
+
+/* Long paths scroll; the path bar keeps the current folder in view */
+.dual-pane-pathbar-crumbs {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dual-pane-pathbar-crumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.dual-pane-pathbar-crumb[aria-current="location"] {
+  font-weight: 500;
+}
+
+.dual-pane-pathbar-separator {
+  flex: 0 0 auto;
+  color: var(--textSecondary);
+  font-size: 1em !important;
+}
+
+.dual-pane-pathbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.dual-pane-header {
+  flex: 0 0 auto;
+  padding: 0.25em 0.5em 0;
+}
+
+.dual-pane-header .listing-item-header.desktop-view {
+  padding-right: calc(var(--listing-col-gap) + 0.5em);
+}
+
+.dual-pane-header .listing-item-header i {
+  margin-left: 0.1em;
+  font-size: 1.2em;
+}
+
+.dual-pane-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.25em 0.5em 0.5em;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  outline: none;
+}
+
+.dual-pane-list .listing-item.clickable {
+  cursor: pointer;
+}
+
+/* The ".." row has no size or date of its own */
+.dual-pane-list .listing-item[data-name=".."] .size,
+.dual-pane-list .listing-item[data-name=".."] .modified {
+  visibility: hidden;
+}
+
+/* Controls that only work in the main listing */
+.dual-pane-right .download-icon,
+.dual-pane-right .overlay-icon {
+  display: none;
+}
+
+.dual-pane-right .listing-item.activebutton {
+  background: var(--primaryColor) !important;
+  color: #fff !important;
+}
+
+.dual-pane-right .listing-item.dual-pane-cursor {
+  outline: 1px dashed color-mix(in srgb, var(--textPrimary) 40%, transparent);
+  outline-offset: -2px;
+}
+
+.dual-pane-right.is-active .listing-item.dual-pane-cursor {
+  outline: 2px solid var(--primaryColor);
+}
+
+.dual-pane-right.is-active .listing-item.activebutton.dual-pane-cursor {
+  outline-color: #fff;
+}
+
+/* Selections stay visible in the inactive pane, but read as passive */
+.dual-pane-right:not(.is-active) .listing-item.activebutton,
+html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
+  background: color-mix(in srgb, var(--primaryColor) 30%, transparent) !important;
+  color: var(--textPrimary) !important;
+}
+
+.dual-pane-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  padding-top: 2em;
+  font-size: 1.1em;
+  opacity: 0.6;
+}
+
+.dual-pane-message .material-symbols {
+  font-size: 2.2em;
+}
+
+.dual-pane-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 2.5em;
+  padding: 0 1em;
+  border-top: 1px solid var(--divider);
+  background-color: var(--panel-bg);
+  color: var(--textSecondary);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.dual-pane-footer span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Divider between the panes, over the right pane's left edge */
+.dual-pane-divider {
+  position: fixed;
+  top: var(--header-height);
+  right: calc(var(--dual-pane-width) - 4px);
+  bottom: 0;
+  z-index: 3;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.dual-pane-divider:hover,
+.dual-pane-divider:focus-visible,
+html.dual-pane-resizing .dual-pane-divider {
+  outline: none;
+  background: color-mix(in srgb, var(--primaryColor) 45%, transparent);
+}
+
+/* Active-pane bar over the left pane, matching the right pane's path bar */
+.dual-pane-left-indicator {
+  position: fixed;
+  top: var(--header-height);
+  right: var(--dual-pane-width);
+  left: 0;
+  z-index: 2;
+  height: 2px;
+  background: var(--primaryColor);
+  pointer-events: none;
+}
+
+/* Right-pane menu */
+.dual-pane-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.dual-pane-menu {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 12em;
+  padding: 0.35em;
+  border: var(--borderWidth) solid var(--surfaceSecondary);
+  border-radius: var(--borderRadius);
+  background-color: var(--background);
+  box-shadow: var(--surfaceElevationShadow);
+}
+
+.dual-pane-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6em;
+  padding: 0.5em 0.75em;
+  border: 0;
+  border-radius: calc(var(--borderRadius) / 2);
+  background: none;
+  color: var(--textPrimary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dual-pane-menu-item:hover,
+.dual-pane-menu-item:focus-visible {
+  outline: none;
+  background: var(--hoverOverlay);
+  transform: none;
+}
+
+.dual-pane-menu-item .material-symbols {
+  color: var(--primaryColor);
+  font-size: 1.25em;
+}
+
+/* Header toggle: auto margins keep the search bar centred in the space-between header */
+header.flexbar > .dual-pane-toggle {
+  margin-left: auto;
+}
+
+header.flexbar:has(> .dual-pane-toggle) > .search-bar-container {
+  margin-left: auto;
+}
+
+.dual-pane-toggle--on .material-symbols {
+  color: var(--primaryColor);
+}

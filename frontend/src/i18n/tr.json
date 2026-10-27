@@ -65,6 +65,16 @@
     "newFolderSuccess": "Klasör başarıyla oluşturuldu!",
     "mobilePdfPreviewHint": "Tarayıcınız, uygulama önizlemesi içinde bu PDF dosyasını görüntüleyemiyor."
   },
+  "dualPane": {
+    "show": "İkinci paneli göster",
+    "hide": "İkinci paneli gizle",
+    "pane": "İkinci panel",
+    "resize": "Panelleri yeniden boyutlandır",
+    "open": "Aç",
+    "openInOtherPane": "Diğer panelde aç",
+    "showInOtherPane": "Bu klasörü diğer panelde göster",
+    "swapPanes": "Panelleri değiştir"
+  },
   "help": {
     "functionKeys": "Fonksiyon Tuşları",
     "mouseActions": "Fare İşlemleri",

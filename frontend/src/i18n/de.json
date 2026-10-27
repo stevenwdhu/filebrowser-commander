@@ -65,6 +65,16 @@
     "newFolderSuccess": "Ordner erfolgreich erstellt!",
     "mobilePdfPreviewHint": "Ihr Browser kann diese PDF-Datei in der App-Vorschau nicht anzeigen."
   },
+  "dualPane": {
+    "show": "Zweiten Bereich anzeigen",
+    "hide": "Zweiten Bereich ausblenden",
+    "pane": "Zweiter Bereich",
+    "resize": "Bereichsgröße ändern",
+    "open": "Öffnen",
+    "openInOtherPane": "Im anderen Bereich öffnen",
+    "showInOtherPane": "Diesen Ordner im anderen Bereich anzeigen",
+    "swapPanes": "Bereiche tauschen"
+  },
   "help": {
     "functionKeys": "Funktionstasten",
     "mouseActions": "Mausaktionen",

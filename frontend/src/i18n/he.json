@@ -65,6 +65,16 @@
     "newFolderSuccess": "התיקייה נוצרה בהצלחה!",
     "mobilePdfPreviewHint": "הדפדפן שלך אינו יכול להציג קובץ PDF זה בתוך תצוגה מקדימה של האפליקציה."
   },
+  "dualPane": {
+    "show": "הצג חלונית שנייה",
+    "hide": "הסתר חלונית שנייה",
+    "pane": "חלונית שנייה",
+    "resize": "שנה גודל חלוניות",
+    "open": "פתח",
+    "openInOtherPane": "פתח בחלונית השנייה",
+    "showInOtherPane": "הצג תיקייה זו בחלונית השנייה",
+    "swapPanes": "החלף חלוניות"
+  },
   "help": {
     "functionKeys": "מקשי פונקציה",
     "mouseActions": "פעולות עכבר",

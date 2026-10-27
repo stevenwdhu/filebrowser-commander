@@ -65,6 +65,16 @@
     "newFolderSuccess": "Le dossier a été créé avec succès !",
     "mobilePdfPreviewHint": "Votre navigateur ne peut pas afficher ce fichier PDF dans l'aperçu de l'application."
   },
+  "dualPane": {
+    "show": "Afficher le second panneau",
+    "hide": "Masquer le second panneau",
+    "pane": "Second panneau",
+    "resize": "Redimensionner les panneaux",
+    "open": "Ouvrir",
+    "openInOtherPane": "Ouvrir dans l'autre panneau",
+    "showInOtherPane": "Afficher ce dossier dans l'autre panneau",
+    "swapPanes": "Échanger les panneaux"
+  },
   "help": {
     "functionKeys": "Touches de Fonction",
     "mouseActions": "Actions de la Souris",

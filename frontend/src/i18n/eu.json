@@ -238,6 +238,16 @@
     "newFolderMessage": "Idatzi karpeta berriaren izena.",
     "newFolderSuccess": "Karpeta ondo sortu da!"
   },
+  "dualPane": {
+    "show": "Erakutsi bigarren panela",
+    "hide": "Ezkutatu bigarren panela",
+    "pane": "Bigarren panela",
+    "resize": "Aldatu panelen tamaina",
+    "open": "Ireki",
+    "openInOtherPane": "Ireki beste panelean",
+    "showInOtherPane": "Erakutsi karpeta hau beste panelean",
+    "swapPanes": "Trukatu panelak"
+  },
   "help": {
     "functionKeys": "Funtzio-teklak",
     "mouseActions": "Saguaren ekintzak",

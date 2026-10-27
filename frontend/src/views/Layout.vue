@@ -19,6 +19,7 @@
       <shelf />
       <router-view />
     </Scrollbar>
+    <DualPaneHost v-if="isLoggedIn" />
     <prompts></prompts>
   </div>
   <Search v-if="showSearch" />
@@ -51,6 +52,7 @@ import { generateRandomCode } from "@/utils/auth";
 import { globalVars } from "@/utils/constants";
 import { syncDocumentTheme, syncEventTheme } from "@/utils/theme";
 import Search from "@/components/Search.vue";
+import DualPaneHost from "@/components/dualPane/DualPaneHost.vue";
 
 export default {
   name: "layout",
@@ -68,6 +70,7 @@ export default {
     PopupPreview,
     Shelf,
     Search,
+    DualPaneHost,
   },
   data() {
     return {

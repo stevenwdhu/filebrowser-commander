@@ -65,6 +65,16 @@
     "newFolderSuccess": "Dosarul a fost creat cu succes!",
     "mobilePdfPreviewHint": "Browserul dumneavoastră nu poate afișa acest fișier PDF în previzualizarea aplicației."
   },
+  "dualPane": {
+    "show": "Afișează al doilea panou",
+    "hide": "Ascunde al doilea panou",
+    "pane": "Al doilea panou",
+    "resize": "Redimensionează panourile",
+    "open": "Deschide",
+    "openInOtherPane": "Deschide în celălalt panou",
+    "showInOtherPane": "Afișează acest dosar în celălalt panou",
+    "swapPanes": "Inversează panourile"
+  },
   "help": {
     "functionKeys": "Taste Funcție",
     "mouseActions": "Acțiuni Mouse",

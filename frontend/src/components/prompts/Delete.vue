@@ -309,7 +309,7 @@ export default {
             // If someone deletes the current folder (from fileTree) that they're viewing, navigate to parent directory
             if (!getters.isPreviewView() && this.itemsToDelete.length === 1) {
               const deletedItem = this.itemsToDelete[0];
-              if (deletedItem.type === 'directory' && deletedItem.path === state.req.path) {
+              if (deletedItem.type === 'directory' && deletedItem.source === state.req.source && deletedItem.path === state.req.path) {
                 const parentPath = url.removeLastDir(deletedItem.path);
                 url.goToItem(deletedItem.source, parentPath, {}, false, getters.isShare());
                 this.deleting = false;

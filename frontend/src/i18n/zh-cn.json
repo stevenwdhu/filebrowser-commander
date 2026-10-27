@@ -65,6 +65,16 @@
     "newFolderSuccess": "文件夹已成功创建！",
     "mobilePdfPreviewHint": "您的浏览器无法在应用预览中显示此 PDF 文件。"
   },
+  "dualPane": {
+    "show": "显示第二窗格",
+    "hide": "隐藏第二窗格",
+    "pane": "第二窗格",
+    "resize": "调整窗格大小",
+    "open": "打开",
+    "openInOtherPane": "在另一个窗格中打开",
+    "showInOtherPane": "在另一个窗格中显示此文件夹",
+    "swapPanes": "交换窗格"
+  },
   "help": {
     "functionKeys": "功能键",
     "mouseActions": "鼠标操作",

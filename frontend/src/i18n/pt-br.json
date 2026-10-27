@@ -65,6 +65,16 @@
     "newFolderSuccess": "A pasta foi criada com sucesso!",
     "mobilePdfPreviewHint": "Seu navegador não consegue exibir este PDF na visualização do aplicativo."
   },
+  "dualPane": {
+    "show": "Mostrar segundo painel",
+    "hide": "Ocultar segundo painel",
+    "pane": "Segundo painel",
+    "resize": "Redimensionar painéis",
+    "open": "Abrir",
+    "openInOtherPane": "Abrir no outro painel",
+    "showInOtherPane": "Mostrar esta pasta no outro painel",
+    "swapPanes": "Trocar painéis"
+  },
   "help": {
     "functionKeys": "Teclas de Função",
     "mouseActions": "Ações do Mouse",

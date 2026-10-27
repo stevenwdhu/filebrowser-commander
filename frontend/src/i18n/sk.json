@@ -65,6 +65,16 @@
     "newFolderSuccess": "Zložka bola úspešne vytvorená!",
     "mobilePdfPreviewHint": "Váš prehliadač nedokáže zobraziť tento súbor PDF v náhľade aplikácie."
   },
+  "dualPane": {
+    "show": "Zobraziť druhý panel",
+    "hide": "Skryť druhý panel",
+    "pane": "Druhý panel",
+    "resize": "Zmeniť veľkosť panelov",
+    "open": "Otvoriť",
+    "openInOtherPane": "Otvoriť v druhom paneli",
+    "showInOtherPane": "Zobraziť tento priečinok v druhom paneli",
+    "swapPanes": "Vymeniť panely"
+  },
   "help": {
     "functionKeys": "Funkčné Klávesy",
     "mouseActions": "Akcie Myši",

@@ -238,6 +238,16 @@
     "newFolderMessage": "Write the name of the new folder.",
     "newFolderSuccess": "Folder created successfully!"
   },
+  "dualPane": {
+    "show": "Show second pane",
+    "hide": "Hide second pane",
+    "pane": "Second pane",
+    "resize": "Resize panes",
+    "open": "Open",
+    "openInOtherPane": "Open in other pane",
+    "showInOtherPane": "Show this folder in the other pane",
+    "swapPanes": "Swap panes"
+  },
   "help": {
     "functionKeys": "Function Keys",
     "mouseActions": "Mouse Actions",

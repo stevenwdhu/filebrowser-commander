@@ -65,6 +65,16 @@
     "newFolderSuccess": "De map is succesvol aangemaakt!",
     "mobilePdfPreviewHint": "Je browser kan dit PDF-bestand niet weergeven in het app-voorbeeld."
   },
+  "dualPane": {
+    "show": "Tweede paneel tonen",
+    "hide": "Tweede paneel verbergen",
+    "pane": "Tweede paneel",
+    "resize": "Formaat van panelen wijzigen",
+    "open": "Openen",
+    "openInOtherPane": "Openen in ander paneel",
+    "showInOtherPane": "Deze map in het andere paneel tonen",
+    "swapPanes": "Panelen omwisselen"
+  },
   "help": {
     "functionKeys": "Functietoetsen",
     "mouseActions": "Muisacties",

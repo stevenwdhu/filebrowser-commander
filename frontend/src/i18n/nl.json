@@ -238,6 +238,16 @@
     "newFolderMessage": "Typ de naam van de nieuwe map.",
     "newFolderSuccess": "De map is succesvol aangemaakt!"
   },
+  "dualPane": {
+    "show": "Tweede paneel tonen",
+    "hide": "Tweede paneel verbergen",
+    "pane": "Tweede paneel",
+    "resize": "Formaat van panelen wijzigen",
+    "open": "Openen",
+    "openInOtherPane": "Openen in ander paneel",
+    "showInOtherPane": "Deze map in het andere paneel tonen",
+    "swapPanes": "Panelen omwisselen"
+  },
   "help": {
     "functionKeys": "Functietoetsen",
     "mouseActions": "Muisacties",

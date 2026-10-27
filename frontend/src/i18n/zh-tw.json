@@ -65,6 +65,16 @@
     "newFolderSuccess": "資料夾已成功建立！",
     "mobilePdfPreviewHint": "您的瀏覽器無法在應用程式預覽中顯示此 PDF 檔案。"
   },
+  "dualPane": {
+    "show": "顯示第二窗格",
+    "hide": "隱藏第二窗格",
+    "pane": "第二窗格",
+    "resize": "調整窗格大小",
+    "open": "開啟",
+    "openInOtherPane": "在另一個窗格中開啟",
+    "showInOtherPane": "在另一個窗格中顯示此資料夾",
+    "swapPanes": "交換窗格"
+  },
   "help": {
     "functionKeys": "功能鍵",
     "mouseActions": "滑鼠操作",

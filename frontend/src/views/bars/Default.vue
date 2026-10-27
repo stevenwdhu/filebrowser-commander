@@ -19,6 +19,7 @@
       />
     </div>
     <title v-if="!showSearch" class="topTitle">{{ getTopTitle }}</title>
+    <DualPaneToggle />
     <action
       v-if="showHeaderSwitchView && !disableNavButtons"
       class="menu-button"
@@ -42,6 +43,7 @@
 import { router } from "@/router";
 import { getters, state, mutations } from "@/store";
 import Action from "@/components/Action.vue";
+import DualPaneToggle from "@/components/dualPane/DualPaneToggle.vue";
 import { globalVars } from "@/utils/constants";
 import { url } from "@/utils";
 
@@ -49,6 +51,7 @@ export default {
   name: "UnifiedHeader",
   components: {
     Action,
+    DualPaneToggle,
   },
   data() {
     return {

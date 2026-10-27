@@ -65,6 +65,16 @@
     "newFolderSuccess": "A mappa létrehozása sikeresen befejeződött!",
     "mobilePdfPreviewHint": "A böngészője nem tudja megjeleníteni ezt a PDF-fájlt az alkalmazás előnézetében."
   },
+  "dualPane": {
+    "show": "Második panel megjelenítése",
+    "hide": "Második panel elrejtése",
+    "pane": "Második panel",
+    "resize": "Panelek átméretezése",
+    "open": "Megnyitás",
+    "openInOtherPane": "Megnyitás a másik panelen",
+    "showInOtherPane": "Mappa megjelenítése a másik panelen",
+    "swapPanes": "Panelek felcserélése"
+  },
   "help": {
     "functionKeys": "Funkcióbillentyűk",
     "mouseActions": "Egérműveletek",

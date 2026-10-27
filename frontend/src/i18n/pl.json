@@ -65,6 +65,16 @@
     "newFolderSuccess": "Folder został pomyślnie utworzony!",
     "mobilePdfPreviewHint": "Twoja przeglądarka nie może wyświetlić tego pliku PDF w podglądzie aplikacji."
   },
+  "dualPane": {
+    "show": "Pokaż drugi panel",
+    "hide": "Ukryj drugi panel",
+    "pane": "Drugi panel",
+    "resize": "Zmień rozmiar paneli",
+    "open": "Otwórz",
+    "openInOtherPane": "Otwórz w drugim panelu",
+    "showInOtherPane": "Pokaż ten folder w drugim panelu",
+    "swapPanes": "Zamień panele"
+  },
   "help": {
     "functionKeys": "Klawisze Funkcji",
     "mouseActions": "Akcje Myszy",

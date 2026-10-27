@@ -65,6 +65,16 @@
     "newFolderSuccess": "폴더가 성공적으로 생성되었습니다!",
     "mobilePdfPreviewHint": "사용 중인 브라우저에서는 앱 미리보기 내에서 이 PDF를 표시할 수 없습니다."
   },
+  "dualPane": {
+    "show": "두 번째 창 표시",
+    "hide": "두 번째 창 숨기기",
+    "pane": "두 번째 창",
+    "resize": "창 크기 조정",
+    "open": "열기",
+    "openInOtherPane": "다른 창에서 열기",
+    "showInOtherPane": "이 폴더를 다른 창에 표시",
+    "swapPanes": "창 바꾸기"
+  },
   "help": {
     "functionKeys": "기능 키",
     "mouseActions": "마우스 작업",

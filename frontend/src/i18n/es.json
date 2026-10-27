@@ -65,6 +65,16 @@
     "newFolderSuccess": "¡La carpeta se ha creado correctamente!",
     "mobilePdfPreviewHint": "Tu navegador no puede mostrar este PDF en la vista previa de la aplicación."
   },
+  "dualPane": {
+    "show": "Mostrar segundo panel",
+    "hide": "Ocultar segundo panel",
+    "pane": "Segundo panel",
+    "resize": "Cambiar tamaño de los paneles",
+    "open": "Abrir",
+    "openInOtherPane": "Abrir en el otro panel",
+    "showInOtherPane": "Mostrar esta carpeta en el otro panel",
+    "swapPanes": "Intercambiar paneles"
+  },
   "help": {
     "functionKeys": "Teclas de función",
     "mouseActions": "Acciones con el mouse",

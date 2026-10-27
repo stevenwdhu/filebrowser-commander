@@ -65,6 +65,16 @@
     "newFolderSuccess": "Mappen har skapats!",
     "mobilePdfPreviewHint": "Din webbläsare kan inte visa den här PDF-filen i appförhandsvisningen."
   },
+  "dualPane": {
+    "show": "Visa andra panelen",
+    "hide": "Dölj andra panelen",
+    "pane": "Andra panelen",
+    "resize": "Ändra storlek på paneler",
+    "open": "Öppna",
+    "openInOtherPane": "Öppna i andra panelen",
+    "showInOtherPane": "Visa den här mappen i andra panelen",
+    "swapPanes": "Byt plats på paneler"
+  },
   "help": {
     "functionKeys": "Funktionstangenter",
     "mouseActions": "Musåtgärder",

@@ -1170,7 +1170,7 @@ export default {
       if (this.resizeTimeout) {
         clearTimeout(this.resizeTimeout);
       }
-      this.width = window.innerWidth;
+      this.width = document.getElementById("main")?.offsetWidth || window.innerWidth;
       this.resizeTimeout = setTimeout(() => {
         this.isResizing = false;
         this.$refs.listingView?.classList.remove("resizing");

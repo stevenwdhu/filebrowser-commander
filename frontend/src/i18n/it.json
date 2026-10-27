@@ -238,6 +238,16 @@
     "newFolderSuccess": "La cartella è stata creata con successo!",
     "mobilePdfPreviewHint": "Il tuo browser non è in grado di visualizzare questo PDF nell'anteprima dell'app."
   },
+  "dualPane": {
+    "show": "Mostra secondo pannello",
+    "hide": "Nascondi secondo pannello",
+    "pane": "Secondo pannello",
+    "resize": "Ridimensiona pannelli",
+    "open": "Apri",
+    "openInOtherPane": "Apri nell'altro pannello",
+    "showInOtherPane": "Mostra questa cartella nell'altro pannello",
+    "swapPanes": "Scambia pannelli"
+  },
   "help": {
     "functionKeys": "Tasti funzione",
     "mouseActions": "Azioni del mouse",

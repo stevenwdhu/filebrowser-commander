@@ -65,6 +65,16 @@
     "newFolderSuccess": "フォルダが正常に作成されました！",
     "mobilePdfPreviewHint": "お使いのブラウザでは、アプリプレビュー内でこのPDFを表示できません。"
   },
+  "dualPane": {
+    "show": "2つ目のペインを表示",
+    "hide": "2つ目のペインを非表示",
+    "pane": "2つ目のペイン",
+    "resize": "ペインのサイズを変更",
+    "open": "開く",
+    "openInOtherPane": "もう一方のペインで開く",
+    "showInOtherPane": "このフォルダーをもう一方のペインに表示",
+    "swapPanes": "ペインを入れ替え"
+  },
   "help": {
     "functionKeys": "ファンクションキー",
     "mouseActions": "マウス操作",
