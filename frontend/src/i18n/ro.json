@@ -209,6 +209,8 @@
     "copyItemQuestion": "Copiați acest element în noua locație?",
     "moveItemQuestion": "Mutați acest element în noua locație?",
     "destinationPath": "Destinație:",
+    "favoriteDestinations": "Favorite",
+    "recentDestinations": "Recente",
     "closeWithActiveUploadsMessage": "Atenție: Aveți încărcări active și închiderea solicitării de încărcare ar putea duce la încărcări neterminate. Ce ați dori să faceți?",
     "closeWithActiveUploads": "Încărcări active",
     "basicInfo": "Informații de bază",

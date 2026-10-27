@@ -209,6 +209,8 @@
     "copyItemQuestion": "Скопіювати цей елемент на нове місце?",
     "moveItemQuestion": "Перемістити цей елемент на нове місце?",
     "destinationPath": "Пункт призначення:",
+    "favoriteDestinations": "Обране",
+    "recentDestinations": "Нещодавні",
     "closeWithActiveUploadsMessage": "Попередження: У вас є активні завантаження, і закриття запиту на завантаження може призвести до незавершених завантажень. Що ви хочете зробити?",
     "closeWithActiveUploads": "Активні завантаження",
     "basicInfo": "Основна інформація",

@@ -209,6 +209,8 @@
     "copyItemQuestion": "¿Quieres copiar este archivo a la nueva ubicación?",
     "moveItemQuestion": "¿Quieres mover este archivo a la nueva ubicación?",
     "destinationPath": "Nueva ubicación:",
+    "favoriteDestinations": "Favoritos",
+    "recentDestinations": "Recientes",
     "closeWithActiveUploadsMessage": "Si cierras esta ventana, puede que la subida de archivos se interrumpa y que algunos queden incompletos. ¿Qué quieres hacer?",
     "closeWithActiveUploads": "Subida de archivos activa",
     "basicInfo": "Información básica",

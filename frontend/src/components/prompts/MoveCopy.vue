@@ -25,6 +25,12 @@
             :placeholder="$t('sidebar.chooseSource')"
             @navigate="syncFileListFromPicker"
           />
+          <MoveCopyQuickDestinations
+            v-if="!isShareContext"
+            :dest-source="destSource"
+            :dest-path="destPath"
+            @select="selectQuickDestination"
+          />
         </template>
       </file-list>
     </div>
@@ -96,11 +102,13 @@ import { goToItemNotificationButton } from "@/utils/notificationActions";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import PathPickerButton from "@/components/files/PathPickerButton.vue";
 import ListingFilter from "@/components/files/ListingFilter.vue";
+import MoveCopyQuickDestinations from "@/components/prompts/MoveCopyQuickDestinations.vue";
 import { eventBus } from '@/store/eventBus';
+import { normalizeDirPath, recordRecentDestination } from "@/utils/moveCopyDestinations";
 
 export default {
   name: "move-copy",
-  components: { FileList, LoadingSpinner, PathPickerButton, ListingFilter },
+  components: { FileList, LoadingSpinner, PathPickerButton, ListingFilter, MoveCopyQuickDestinations },
   props: {
     promptId: {
       type: [String, Number],
@@ -209,6 +217,12 @@ export default {
     }
   },
   methods: {
+    selectQuickDestination({ source, path }) {
+      if (!source || this.isLoading) return;
+      this.destSource = source;
+      this.destPath = normalizeDirPath(path);
+      void this.syncFileListFromPicker();
+    },
     async syncFileListFromPicker() {
       await this.$nextTick();
       if (this.$refs.fileList && this.destSource && this.destPath) {
@@ -389,6 +403,10 @@ export default {
           notify.showError(
             this.$t("prompts.partialSuccess", { succeeded: succeededCount, failed: failedCount })
           );
+        }
+
+        if (!getters.isShare()) {
+          recordRecentDestination(state.user?.username, this.destSource, this.destPath);
         }
 
         // Determine if we should navigate (we can move items with fileTree context menu in previews)

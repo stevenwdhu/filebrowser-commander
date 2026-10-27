@@ -209,6 +209,8 @@
     "copyItemQuestion": "Скопировать этот элемент в новое место?",
     "moveItemQuestion": "Переместить этот предмет на новое место?",
     "destinationPath": "Пункт назначения:",
+    "favoriteDestinations": "Избранное",
+    "recentDestinations": "Недавние",
     "closeWithActiveUploadsMessage": "Предупреждение: У вас есть активные загрузки, и закрытие окна загрузки может привести к незавершенным загрузкам. Что бы вы хотели сделать?",
     "closeWithActiveUploads": "Активные загрузки",
     "basicInfo": "Основная информация",

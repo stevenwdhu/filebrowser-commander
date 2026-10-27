@@ -498,6 +498,8 @@
     "copyItemQuestion": "Kopiatu elementu hau kokaleku berrira?",
     "moveItemQuestion": "Mugitu elementu hau kokaleku berrira?",
     "destinationPath": "Helburua:",
+    "favoriteDestinations": "Gogokoak",
+    "recentDestinations": "Azkenak",
     "closeWithActiveUploads": "Igoera aktiboak",
     "closeWithActiveUploadsMessage": "Kontuz: igoera aktiboak dituzu, eta igoeren leihoa ixteak igoerak amaitu gabe uztea ekar dezake. Zer egin nahi duzu?",
     "basicInfo": "Oinarrizko informazioa",

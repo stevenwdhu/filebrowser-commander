@@ -209,6 +209,8 @@
     "copyItemQuestion": "Αντιγράψτε αυτό το στοιχείο στη νέα θέση;",
     "moveItemQuestion": "Μετακινήστε αυτό το στοιχείο στη νέα θέση;",
     "destinationPath": "Προορισμός:",
+    "favoriteDestinations": "Αγαπημένα",
+    "recentDestinations": "Πρόσφατα",
     "closeWithActiveUploadsMessage": "Προειδοποίηση: Το κλείσιμο της προτροπής μεταφόρτωσης μπορεί να οδηγήσει σε ημιτελείς μεταφορτώσεις. Τι θα θέλατε να κάνετε;",
     "closeWithActiveUploads": "Ενεργές μεταφορτώσεις",
     "basicInfo": "Βασικές πληροφορίες",

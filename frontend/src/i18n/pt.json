@@ -209,6 +209,8 @@
     "copyItemQuestion": "Copiar este item para a nova localização?",
     "moveItemQuestion": "Mover este item para a nova localização?",
     "destinationPath": "Destino:",
+    "favoriteDestinations": "Favoritos",
+    "recentDestinations": "Recentes",
     "closeWithActiveUploadsMessage": "Aviso: Tem carregamentos activos e fechar a janela de carregamento pode resultar em carregamentos inacabados. O que é que gostaria de fazer?",
     "closeWithActiveUploads": "Carregamentos activos",
     "basicInfo": "Informações básicas",

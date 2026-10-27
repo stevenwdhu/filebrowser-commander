@@ -209,6 +209,8 @@
     "copyItemQuestion": "نسخ هذا العنصر إلى الموقع الجديد؟",
     "moveItemQuestion": "نقل هذا العنصر إلى الموقع الجديد؟",
     "destinationPath": "الوجهة",
+    "favoriteDestinations": "المفضلة",
+    "recentDestinations": "الأخيرة",
     "closeWithActiveUploadsMessage": "تحذير: لديك تحميلات نشطة وقد يؤدي إغلاق مطالبة التحميل إلى تحميلات غير مكتملة. ماذا تريد أن تفعل؟",
     "closeWithActiveUploads": "التحميلات النشطة",
     "basicInfo": "معلومات أساسية",

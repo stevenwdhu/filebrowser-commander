@@ -477,6 +477,8 @@
     "copyItemQuestion": "Copiare questo elemento nella nuova posizione?",
     "moveItemQuestion": "Spostare questo elemento nella nuova posizione?",
     "destinationPath": "Destinazione:",
+    "favoriteDestinations": "Preferiti",
+    "recentDestinations": "Recenti",
     "closeWithActiveUploads": "Caricamenti attivi",
     "closeWithActiveUploadsMessage": "Attenzione: hai dei caricamenti attivi. Chiudere potrebbe interromperli. Cosa vuoi fare?",
     "basicInfo": "Informazioni di base",

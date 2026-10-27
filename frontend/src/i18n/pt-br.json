@@ -209,6 +209,8 @@
     "copyItemQuestion": "Copiar esse item para o novo local?",
     "moveItemQuestion": "Mover esse item para o novo local?",
     "destinationPath": "Destino:",
+    "favoriteDestinations": "Favoritos",
+    "recentDestinations": "Recentes",
     "closeWithActiveUploadsMessage": "Aviso: Você tem uploads ativos e fechar o prompt de upload pode resultar em uploads inacabados. O que você gostaria de fazer?",
     "closeWithActiveUploads": "Uploads ativos",
     "basicInfo": "Informações básicas",

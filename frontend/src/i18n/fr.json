@@ -209,6 +209,8 @@
     "copyItemQuestion": "Copier cet élément vers le nouvel emplacement ?",
     "moveItemQuestion": "Déplacer cet élément vers le nouvel emplacement ?",
     "destinationPath": "Destination :",
+    "favoriteDestinations": "Favoris",
+    "recentDestinations": "Récents",
     "closeWithActiveUploadsMessage": "Attention : Vous avez des téléchargements actifs et la fermeture de l'invite de téléchargement pourrait entraîner des téléchargements inachevés. Que voulez-vous faire ?",
     "closeWithActiveUploads": "Téléchargements actifs",
     "basicInfo": "Informations de base",

@@ -209,6 +209,8 @@
     "copyItemQuestion": "Dieses Element an den neuen Ort kopieren?",
     "moveItemQuestion": "Diesen Artikel an den neuen Ort verschieben?",
     "destinationPath": "Zielort:",
+    "favoriteDestinations": "Favoriten",
+    "recentDestinations": "Zuletzt verwendet",
     "closeWithActiveUploadsMessage": "Warnung: Sie haben aktive Uploads und das Schließen der Upload-Aufforderung könnte zu unvollendeten Uploads führen. Was würden Sie gerne tun?",
     "closeWithActiveUploads": "Aktive Uploads",
     "basicInfo": "Grundlegende Informationen",

@@ -281,6 +281,8 @@
     "copyItemQuestion": "Zkopírovat tuto položku do nového umístění?",
     "moveItemQuestion": "Přesunout tuto položku na nové místo?",
     "destinationPath": "Cílová destinace:",
+    "favoriteDestinations": "Oblíbené",
+    "recentDestinations": "Nedávné",
     "closeWithActiveUploadsMessage": "Varování: Upozornění: Máte aktivní nahrávání a zavření výzvy k nahrávání by mohlo vést k nedokončenému nahrávání. Co byste chtěli udělat?",
     "closeWithActiveUploads": "Aktivní nahrávání",
     "basicInfo": "Základní informace",

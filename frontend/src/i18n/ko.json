@@ -209,6 +209,8 @@
     "copyItemQuestion": "이 항목을 새 위치로 복사하시겠습니까?",
     "moveItemQuestion": "이 항목을 새 위치로 옮기시겠습니까?",
     "destinationPath": "목적지:",
+    "favoriteDestinations": "즐겨찾기",
+    "recentDestinations": "최근",
     "closeWithActiveUploadsMessage": "경고: 업로드가 진행 중이며 업로드 프롬프트를 닫으면 완료되지 않은 업로드가 발생할 수 있습니다. 어떻게 하시겠습니까?",
     "closeWithActiveUploads": "활성 업로드",
     "basicInfo": "기본 정보",

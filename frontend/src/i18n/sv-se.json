@@ -209,6 +209,8 @@
     "copyItemQuestion": "Kopiera det här objektet till den nya platsen?",
     "moveItemQuestion": "Flytta det här objektet till den nya platsen?",
     "destinationPath": "Destination:",
+    "favoriteDestinations": "Favoriter",
+    "recentDestinations": "Senaste",
     "closeWithActiveUploadsMessage": "Varning för uppladdning: Du har aktiva uppladdningar och om du stänger uppladdningsprompten kan det leda till oavslutade uppladdningar. Vad skulle du vilja göra?",
     "closeWithActiveUploads": "Aktiva uppladdningar",
     "basicInfo": "Grundläggande information",

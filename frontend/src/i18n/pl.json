@@ -209,6 +209,8 @@
     "copyItemQuestion": "Skopiować ten element do nowej lokalizacji?",
     "moveItemQuestion": "Przenieść ten element do nowej lokalizacji?",
     "destinationPath": "Miejsce docelowe:",
+    "favoriteDestinations": "Ulubione",
+    "recentDestinations": "Ostatnie",
     "closeWithActiveUploadsMessage": "Ostrzeżenie: Masz aktywne przesyłanie, a zamknięcie monitu o przesłanie może spowodować niedokończone przesyłanie. Co chcesz zrobić?",
     "closeWithActiveUploads": "Aktywne przesyłanie",
     "basicInfo": "Podstawowe informacje",

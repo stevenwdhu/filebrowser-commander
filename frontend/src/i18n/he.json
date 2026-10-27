@@ -209,6 +209,8 @@
     "copyItemQuestion": "האם להעתיק פריט זה למיקום החדש?",
     "moveItemQuestion": "האם להעביר פריט זה למיקום החדש?",
     "destinationPath": "יעד:",
+    "favoriteDestinations": "מועדפים",
+    "recentDestinations": "אחרונים",
     "closeWithActiveUploadsMessage": "אזהרה: יש לך העלאות פעילות וסגירת חלון ההעלאה עלולה לגרום להשלמת העלאות לא גמורות. מה ברצונך לעשות?",
     "closeWithActiveUploads": "העלאות פעילות",
     "basicInfo": "מידע בסיסי",
