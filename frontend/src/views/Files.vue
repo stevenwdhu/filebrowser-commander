@@ -19,6 +19,7 @@ import Errors from "@/views/Errors.vue";
 import Preview from "@/views/files/Preview.vue";
 import ListingView from "@/views/files/ListingView.vue";
 import { state, mutations, getters } from "@/store";
+import { saveActivePaneViewMode } from "@/store/dualPane.js";
 import { router } from "@/router";
 import { extractSourceFromPath, removeLastDir, base64Encode, removeTrailingSlash } from "@/utils/url.js";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
@@ -665,8 +666,10 @@ export default {
           newViewMode = size <= 4 ? 'icons' : 'gallery';
         }
 
-        mutations.updateDisplayPreferences({ viewMode: newViewMode });
-        void mutations.updateCurrentUser({ viewMode: newViewMode });
+        if (!saveActivePaneViewMode(newViewMode)) {
+          mutations.updateDisplayPreferences({ viewMode: newViewMode });
+          void mutations.updateCurrentUser({ viewMode: newViewMode });
+        }
         mutations.closeHovers();
       }
     },

@@ -1094,12 +1094,13 @@ export const mutations = {
     state.user.fileLoading.maxConcurrentUpload = value;
     emitStateChanged();
   },
-  updateDisplayPreferences: (payload: Partial<DisplayPreference>) => {
-    let source = state.sources.current;
-    if (getters.isShare()) {
+  // location: another folder's source and route path (the dual pane's); defaults to the current folder
+  updateDisplayPreferences: (payload: Partial<DisplayPreference>, location?: { source: string; path: string }) => {
+    let source = location?.source ?? state.sources.current;
+    if (!location && getters.isShare()) {
       source = getters.currentHash();
     }
-    const path = state.route.path;
+    const path = location?.path ?? state.route.path;
 
     if (!source || path === null || path === "") return;
 

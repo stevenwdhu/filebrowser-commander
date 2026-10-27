@@ -45,6 +45,7 @@
 
 <script>
 import { getters, mutations, state } from "@/store";
+import { dualPane } from "@/store/dualPane.js";
 import { getHumanReadableFilesize } from "@/utils/filesizes";
 
 export default {
@@ -202,7 +203,8 @@ export default {
       // Only update if the mode actually changed
       if (newMode !== currentMode) {
         mutations.updateDisplayPreferences({ viewMode: newMode });
-        void mutations.updateCurrentUser({ viewMode: newMode });
+        // With both panes shown a new default would change the other pane too; it follows the size on its own
+        if (!dualPane.shown) void mutations.updateCurrentUser({ viewMode: newMode });
       }
     },
     // Ctrl + Mouse Wheel to adjust the slider sizes

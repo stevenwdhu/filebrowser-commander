@@ -36,6 +36,7 @@ import DualPanePanel from "@/components/dualPane/DualPanePanel.vue";
 import {
   dualPane,
   ensureRightLoaded,
+  followGallerySize,
   initDualPane,
   paneSideOfElement,
   refreshRight,
@@ -150,6 +151,7 @@ export default {
       if (reload) refreshRight();
     }, { flush: "sync" });
     this.stopSortWatch = this.$watch(() => getters.pickerSorting(), () => resortRight(), { deep: true });
+    this.stopSizeWatch = this.$watch(() => state.user?.gallerySize, (size) => followGallerySize(size));
     eventBus.on("itemsDeleted", refreshRight);
     eventBus.on("itemsRenamed", refreshRight);
     window.addEventListener("keydown", this.onKeydown, true);
@@ -161,6 +163,7 @@ export default {
     this.stopUserWatch?.();
     this.stopReloadWatch?.();
     this.stopSortWatch?.();
+    this.stopSizeWatch?.();
     eventBus.off("itemsDeleted", refreshRight);
     eventBus.off("itemsRenamed", refreshRight);
     window.removeEventListener("keydown", this.onKeydown, true);

@@ -2,7 +2,7 @@
 // state.selected); this module owns the second, right-hand pane and which side is active.
 // A module-level reactive so it survives Layout remounts between route records.
 import { markRaw, reactive, toRaw } from "vue";
-import { getters, state } from "@/store/index.ts";
+import { getters, mutations, state } from "@/store/index.ts";
 import { resourcesApi } from "@/api/index.js";
 import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
 import {
@@ -17,6 +17,7 @@ import {
   selectAll,
   toggleMarkAndAdvance,
 } from "@/utils/dualPane/paneModel.js";
+import { modeForSize } from "@/utils/dualPane/paneLayout.js";
 import { clampRatio, loadDualPanePrefs, saveDualPanePrefs } from "@/utils/dualPane/prefs.js";
 
 /** Narrower windows keep the single-pane layout. */
@@ -209,6 +210,57 @@ export function resortRight() {
   const right = dualPane.right;
   if (!right.listing) return;
   showListing(right.source, right.path, right.listing, { keepSelection: true });
+}
+
+// The main listing keeps a folder's display preferences under its route path, as buildItemUrl
+// builds it outside shares. Built here so the store doesn't load the router, and so the key stays
+// the folder's own while a share is open.
+function preferenceLocation(source, path) {
+  const encodedPath = normalizeDirPath(path).slice(1).split("/").map(encodeURIComponent).join("/");
+  return { source, path: `/files/${encodeURIComponent(source)}/${encodedPath}` };
+}
+
+function saveRightViewMode(viewMode) {
+  const { source, path } = dualPane.right;
+  if (source) mutations.updateDisplayPreferences({ viewMode }, preferenceLocation(source, path));
+}
+
+/** The right pane's layout: its folder's saved view mode, else the user's default, as getters.viewMode for the left. */
+export function rightViewMode() {
+  const { source, path } = dualPane.right;
+  const location = source ? preferenceLocation(source, path) : null;
+  const saved = location ? getters.displayPreferenceFor(location.source, location.path)?.viewMode : null;
+  return saved || state.user?.viewMode || "normal";
+}
+
+/** The layout the top bar's Switch view changes: the right pane's while it's the active one, else the main listing's. */
+export function activePaneViewMode() {
+  return dualPane.shown && dualPane.active === "right" ? rightViewMode() : getters.viewMode();
+}
+
+/**
+ * Switch view with both panes shown: save the layout for the active pane's folder only, without
+ * making it the default, which would also change the other pane. False with one pane shown.
+ */
+export function saveActivePaneViewMode(viewMode) {
+  if (!dualPane.shown) return false;
+  if (dualPane.active === "right") {
+    saveRightViewMode(viewMode);
+  } else {
+    mutations.updateDisplayPreferences({ viewMode });
+  }
+  return true;
+}
+
+/**
+ * The size slider moves the main listing's folder between compact and list, or icons and gallery;
+ * keep the right pane's in step while it's on screen. Like the main listing, folders out of sight are left as they are.
+ */
+export function followGallerySize(size) {
+  if (!dualPane.shown || !dualPane.right.source) return;
+  const mode = rightViewMode();
+  const sized = modeForSize(mode, size);
+  if (sized !== mode) saveRightViewMode(sized);
 }
 
 function applyToRight(update) {

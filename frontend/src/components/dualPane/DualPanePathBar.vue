@@ -28,16 +28,6 @@
       <button
         type="button"
         class="dual-pane-pathbar-action"
-        :disabled="right.path === '/'"
-        :title="$t('buttons.openParentFolder')"
-        :aria-label="$t('buttons.openParentFolder')"
-        @click="run('parent')"
-      >
-        <i class="material-symbols" aria-hidden="true">arrow_upward</i>
-      </button>
-      <button
-        type="button"
-        class="dual-pane-pathbar-action"
         :title="$t('buttons.refresh')"
         :aria-label="$t('buttons.refresh')"
         @click="run('refresh')"

@@ -46,6 +46,8 @@ export default {
   components: {
     ThreeJs: createAsyncComponent(() => import('@/views/files/ThreeJs.vue')),
   },
+  // A listing other than the main one (the dual pane) provides its own view mode
+  inject: { listingViewMode: { default: null } },
   props: {
     filename: {
       type: String,
@@ -118,6 +120,9 @@ export default {
     };
   },
   computed: {
+    viewMode() {
+      return this.listingViewMode || getters.viewMode();
+    },
     placeholderUrl() {
       return `${globalVars.baseURL}public/static/img/placeholder.png`;
     },
@@ -206,7 +211,7 @@ export default {
       return this.imageBlobUrl || this.placeholderUrl;
     },
     showLargeIcon() {
-      return getters.viewMode() === "gallery";
+      return this.viewMode === "gallery";
     },
     popupPreviewUrl() {
       if (!this.thumbnailUrl) {
@@ -215,7 +220,7 @@ export default {
       return `${this.thumbnailUrl}&size=xlarge`;
     },
     showLarger() {
-      return getters.viewMode() === "gallery" || getters.viewMode() === "normal";
+      return this.viewMode === "gallery" || this.viewMode === "normal";
     },
     hasMotion() {
       return (
@@ -258,7 +263,7 @@ export default {
     gallerySizeKey() {
       // Returns gallery size to force 3D preview re-initialization on size change
       // Also includes view mode to handle view changes
-      return `${state.user?.gallerySize || 1}-${getters.viewMode()}`;
+      return `${state.user?.gallerySize || 1}-${this.viewMode}`;
     },
     routePath() {
       return state.route.path ?? "";
@@ -459,6 +464,8 @@ export default {
   },
   watch: {
     routePath() {
+      // The dual pane's listing stays on screen when the main listing's route changes
+      if (this.listingViewMode) return;
       this.cancelActivePreviews();
       this.imageState = "loading";
     },

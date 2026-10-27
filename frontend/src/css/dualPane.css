@@ -39,10 +39,6 @@ html.dual-pane-resizing * {
 
 /* Right pane */
 .dual-pane-right {
-  --listing-col-gap: 0.5rem;
-  --listing-col-size: 5rem;
-  --listing-col-modified: 8.5rem;
-
   position: fixed;
   top: var(--header-height);
   right: 0;
@@ -142,13 +138,10 @@ html.dual-pane-resizing * {
   flex: 0 0 auto;
 }
 
+/* Spaced like the main listing's header and rows */
 .dual-pane-header {
   flex: 0 0 auto;
-  padding: 0.25em 0.5em 0;
-}
-
-.dual-pane-header .listing-item-header.desktop-view {
-  padding-right: calc(var(--listing-col-gap) + 0.5em);
+  padding: 0.25em 0.5em 0.5em;
 }
 
 .dual-pane-header .listing-item-header i {
@@ -159,7 +152,7 @@ html.dual-pane-resizing * {
 .dual-pane-list {
   flex: 1 1 auto;
   min-height: 0;
-  padding: 0.25em 0.5em 0.5em;
+  padding: 0.3em 0.5em 0.5em;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -215,6 +208,16 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
   padding-top: 2em;
   font-size: 1.1em;
   opacity: 0.6;
+}
+
+/* The compact layout hides the listing's headings, and these are h2s too */
+.listing-items.dual-pane-list .dual-pane-message {
+  display: flex;
+}
+
+/* The pane can be narrower than a gallery tile, which the main listing never is */
+.listing-items.dual-pane-list.gallery :is(.folder-items, .file-items) {
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--item-width), 100%), 1fr)); /* stylelint-disable-line no-unknown-custom-properties */
 }
 
 .dual-pane-message .material-symbols {

@@ -101,6 +101,8 @@ import { state, getters, mutations } from "@/store";
 
 export default {
   name: "ListingHeader",
+  // A listing other than the main one (the dual pane) provides its own view mode
+  inject: { listingViewMode: { default: null } },
   props: {
     hasDuration: {
       type: Boolean,
@@ -117,6 +119,9 @@ export default {
     },
   },
   computed: {
+    viewMode() {
+      return this.listingViewMode || getters.viewMode();
+    },
     isMobile() {
       return getters.isMobile();
     },
@@ -146,10 +151,10 @@ export default {
       return this.sortConfig.asc;
     },
     galleryView() {
-      return getters.viewMode() === "gallery";
+      return this.viewMode === "gallery";
     },
     isListMode() {
-      const mode = getters.viewMode();
+      const mode = this.viewMode;
       return mode === "list" || mode === "compact";
     },
     showKindColumn() {

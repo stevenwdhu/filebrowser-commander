@@ -193,6 +193,8 @@ export default {
       localSelected: false,
     };
   },
+  // A listing other than the main one (the dual pane) provides its own view mode
+  inject: { listingViewMode: { default: null } },
   props: {
     name: String,
     isDir: Boolean,
@@ -252,6 +254,9 @@ export default {
     },
   },
   computed: {
+    viewMode() {
+      return this.listingViewMode || getters.viewMode();
+    },
     displayName() {
       // If displayFullPath is true, show the full path, otherwise just the name
       return this.displayFullPath ? this.path : this.name;
@@ -271,7 +276,7 @@ export default {
         : formatTimestamp(this.created, state.user?.locale, { seconds: false });
     },
     galleryView() {
-      return getters.viewMode() === "gallery";
+      return this.viewMode === "gallery";
     },
     quickDownloadEnabled() {
       if (getters.isShare()) {
@@ -283,7 +288,7 @@ export default {
       if (getters.isShare()) {
         return state.shareInfo?.quickDownload && !this.galleryView && this.isDir;
       }
-      return state.user?.quickDownload && !this.galleryView && getters.viewMode() !== "icons" && getters.viewMode() !== "normal" && this.isDir;
+      return state.user?.quickDownload && !this.galleryView && this.viewMode !== "icons" && this.viewMode !== "normal" && this.isDir;
     },
     isHiddenNotSelected() {
       return !this.isSelected && this.reducedOpacity;
@@ -424,7 +429,7 @@ export default {
       return this.isListMode && !this.showLimitedOptions && state.user?.showCreationDateColumn;
     },
     isListMode() {
-      const mode = getters.viewMode();
+      const mode = this.viewMode;
       return mode === 'list' || mode === 'compact';
     },
   },

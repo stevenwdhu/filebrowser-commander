@@ -8,6 +8,7 @@ import { router } from "@/router/index.ts";
 import { buildItemUrl, goToItem } from "@/utils/url.js";
 import { processTypeAheadKey, resetTypeAheadSession } from "@/utils/listingTypeAhead.js";
 import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
+import { closestInDirection, isCardMode } from "@/utils/dualPane/paneLayout.js";
 import { childName, isParentEntry, operationTargets, parentDir } from "@/utils/dualPane/paneModel.js";
 import {
   dualPane,
@@ -15,6 +16,7 @@ import {
   paneContext,
   refreshRight,
   rightSelection,
+  rightViewMode,
   setActivePane,
   toggleDualPane,
 } from "@/store/dualPane.js";
@@ -46,6 +48,48 @@ function pageSize() {
   const row = list?.querySelector(".listing-item");
   if (!list || !row || row.offsetHeight === 0) return 10;
   return Math.max(1, Math.floor(list.clientHeight / row.offsetHeight) - 1);
+}
+
+// Where an entry sits on screen, without the zoom a hovered card gets: the centre from its box
+// and the size from its layout
+function entryRect(element) {
+  const box = element.getBoundingClientRect();
+  const x = (box.left + box.right) / 2;
+  const y = (box.top + box.bottom) / 2;
+  const halfWidth = element.offsetWidth / 2;
+  const halfHeight = element.offsetHeight / 2;
+  return { left: x - halfWidth, right: x + halfWidth, top: y - halfHeight, bottom: y + halfHeight };
+}
+
+/**
+ * Move the cursor a row up (direction -1) or down on screen in a card layout, where a row holds
+ * several entries, or with `page` as many rows as fit in the pane, staying in the starting column.
+ * False in the list layouts, or with no cursor yet, which move by entries instead.
+ */
+function moveByRows(direction, extend, { page = false } = {}) {
+  const right = dualPane.right;
+  const list = rightListElement();
+  const from = right.entries.findIndex((entry) => entry.path === right.cursor);
+  if (!isCardMode(rightViewMode()) || !list || from === -1) return false;
+  const rectByPath = new Map();
+  for (const element of list.querySelectorAll(".listing-item[data-path]")) {
+    rectByPath.set(element.dataset.path, entryRect(element));
+  }
+  const rects = right.entries.map((entry) => rectByPath.get(entry.path) || null);
+  const start = rects[from];
+  if (!start) return false;
+  const column = (start.left + start.right) / 2;
+  // A page keeps the starting row in view: it goes no further than the pane's height less a row
+  const reach = list.clientHeight - (start.bottom - start.top);
+  let to = from;
+  for (;;) {
+    const next = closestInDirection(rects, to, direction < 0 ? "up" : "down", column);
+    if (next === -1 || (to !== from && Math.abs(rects[next].top - start.top) > reach)) break;
+    to = next;
+    if (!page) break;
+  }
+  rightSelection.move(to - from, { extend });
+  return true;
 }
 
 function showLeftFolder(source, path) {
@@ -218,8 +262,8 @@ export const dualPaneCommands = {
   openInOther,
   showInOther,
   swapPanes,
-  cursor: ({ step, extend }) => rightSelection.move(step, { extend }),
-  page: ({ direction, extend }) => rightSelection.move(direction * pageSize(), { extend }),
+  cursor: ({ step, extend, rows }) => (rows && moveByRows(step, extend)) || rightSelection.move(step, { extend }),
+  page: ({ direction, extend }) => moveByRows(direction, extend, { page: true }) || rightSelection.move(direction * pageSize(), { extend }),
   open: () => openEntry(rightEntry()),
   parent: () => {
     const { source, path } = dualPane.right;

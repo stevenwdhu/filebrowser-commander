@@ -20,8 +20,11 @@ describe("resolveDualPaneKey", () => {
   });
 
   it("maps the right pane's navigation and file keys", () => {
-    expect(key({ key: "ArrowDown" })).toEqual({ cmd: "cursor", args: { step: 1, extend: false } });
-    expect(key({ key: "ArrowUp", shiftKey: true })).toEqual({ cmd: "cursor", args: { step: -1, extend: true } });
+    expect(key({ key: "ArrowDown" })).toEqual({ cmd: "cursor", args: { step: 1, extend: false, rows: true } });
+    expect(key({ key: "ArrowUp", shiftKey: true })).toEqual({ cmd: "cursor", args: { step: -1, extend: true, rows: true } });
+    // Left and right go through the entries in order, which is the same thing in a list
+    expect(key({ key: "ArrowLeft" })).toEqual({ cmd: "cursor", args: { step: -1, extend: false } });
+    expect(key({ key: "ArrowRight", shiftKey: true })).toEqual({ cmd: "cursor", args: { step: 1, extend: true } });
     expect(key({ key: "PageDown" })).toEqual({ cmd: "page", args: { direction: 1, extend: false } });
     expect(key({ key: "Enter" })).toEqual({ cmd: "open" });
     expect(key({ key: "Backspace" })).toEqual({ cmd: "parent" });
@@ -93,7 +96,7 @@ describe("resolveDualPaneKey", () => {
     expect(key({ key: "ArrowLeft" }, {}, element('<div role="separator" tabindex="0"></div>'))).toBeNull();
     expect(key({ key: "Enter" }, {}, element('<a class="listing-item"><span>row</span></a>', "span"))).toEqual({ cmd: "open" });
     expect(key({ key: "Enter", repeat: true })).toBeNull();
-    expect(key({ key: "ArrowDown", repeat: true })).toEqual({ cmd: "cursor", args: { step: 1, extend: false } });
+    expect(key({ key: "ArrowDown", repeat: true })).toEqual({ cmd: "cursor", args: { step: 1, extend: false, rows: true } });
   });
 
   it("keeps keys inside the pane menu", () => {

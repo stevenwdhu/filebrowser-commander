@@ -99,10 +99,13 @@ function resolveRight(event) {
     }
   }
   switch (key) {
+    // Up and down go by rows, which differ from entries in the card layouts
     case "ArrowUp":
+      return { cmd: "cursor", args: { step: -1, extend: shift, rows: true } };
+    case "ArrowDown":
+      return { cmd: "cursor", args: { step: 1, extend: shift, rows: true } };
     case "ArrowLeft":
       return { cmd: "cursor", args: { step: -1, extend: shift } };
-    case "ArrowDown":
     case "ArrowRight":
       return { cmd: "cursor", args: { step: 1, extend: shift } };
     case "Home":

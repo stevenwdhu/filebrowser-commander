@@ -44,6 +44,7 @@ import { router } from "@/router";
 import { getters, state, mutations } from "@/store";
 import Action from "@/components/Action.vue";
 import DualPaneToggle from "@/components/dualPane/DualPaneToggle.vue";
+import { activePaneViewMode, saveActivePaneViewMode } from "@/store/dualPane.js";
 import { globalVars } from "@/utils/constants";
 import { url } from "@/utils";
 
@@ -106,7 +107,7 @@ export default {
         normal: "view_module",
         gallery: "grid_view",
       };
-      return icons[getters.viewMode()] || "grid_view";
+      return icons[activePaneViewMode()] || "grid_view";
     },
     isShare() {
       return getters.isShare();
@@ -201,11 +202,12 @@ export default {
     },
     switchView() {
       mutations.closeHovers();
-      const current = getters.viewMode();
+      const current = activePaneViewMode();
       const cycleIndex = this.viewModeCycleIndex(current);
       const nextIndex = (cycleIndex + 1) % this.viewModes.length;
       const baseMode = this.viewModes.at(nextIndex);
       const newViewMode = this.resolveViewModeForFamily(baseMode);
+      if (saveActivePaneViewMode(newViewMode)) return;
       mutations.updateDisplayPreferences({ viewMode: newViewMode });
       void mutations.updateCurrentUser({ viewMode: newViewMode });
     },

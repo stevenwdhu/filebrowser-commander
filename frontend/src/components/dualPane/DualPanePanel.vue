@@ -28,11 +28,12 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import ListingHeader from "@/components/files/ListingHeader.vue";
 import DualPaneList from "@/components/dualPane/DualPaneList.vue";
 import DualPaneMenu from "@/components/dualPane/DualPaneMenu.vue";
 import DualPanePathBar from "@/components/dualPane/DualPanePathBar.vue";
-import { dualPane, rightSelection, setActivePane } from "@/store/dualPane.js";
+import { dualPane, rightSelection, rightViewMode, setActivePane } from "@/store/dualPane.js";
 import { getHumanReadableFilesize } from "@/utils/filesizes";
 import { paneSummary } from "@/utils/dualPane/paneModel.js";
 
@@ -43,6 +44,8 @@ const CONTROL_KEYS = new Set([" ", "Enter"]);
 export default {
   name: "DualPanePanel",
   components: { ListingHeader, DualPaneList, DualPaneMenu, DualPanePathBar },
+  // The header, rows and icons follow this folder's layout rather than the main listing's
+  provide: () => ({ listingViewMode: computed(rightViewMode) }),
   data: () => ({
     longPressTimer: null,
   }),
