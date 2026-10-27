@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { getters, state } from "@/store";
+import { getters } from "@/store";
 import { globalVars } from "@/utils/constants";
 import { dualPane, toggleDualPane } from "@/store/dualPane.js";
 
@@ -25,14 +25,8 @@ export default {
       return dualPane.enabled;
     },
     visible() {
-      return (
-        getters.currentView() === "listingView" &&
-        Boolean(state.user?.username) &&
-        !getters.isShare() &&
-        !getters.isMobile() &&
-        dualPane.wideEnough &&
-        !globalVars.disableNavButtons
-      );
+      // DualPaneHost decides whether two panes fit (window, phone, share, sticky sidebar)
+      return getters.currentView() === "listingView" && dualPane.available && !globalVars.disableNavButtons;
     },
     // A toggle keeps one name; the tooltip says what a click does
     title() {

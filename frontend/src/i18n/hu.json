@@ -75,7 +75,11 @@
     "showInOtherPane": "Mappa megjelenítése a másik panelen",
     "swapPanes": "Panelek felcserélése",
     "copyToOtherPane": "Másolás a másik panelre",
-    "moveToOtherPane": "Áthelyezés a másik panelre"
+    "moveToOtherPane": "Áthelyezés a másik panelre",
+    "shortcuts": "Két panel",
+    "switchPane": "Váltás a panelek között",
+    "markItem": "Elem kijelölése vagy a kijelölés megszüntetése, majd lépés lefelé",
+    "toggle": "Második panel megjelenítése vagy elrejtése"
   },
   "help": {
     "functionKeys": "Funkcióbillentyűk",

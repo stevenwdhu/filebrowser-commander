@@ -75,7 +75,11 @@
     "showInOtherPane": "Mostrar esta carpeta en el otro panel",
     "swapPanes": "Intercambiar paneles",
     "copyToOtherPane": "Copiar al otro panel",
-    "moveToOtherPane": "Mover al otro panel"
+    "moveToOtherPane": "Mover al otro panel",
+    "shortcuts": "Dos paneles",
+    "switchPane": "Cambiar entre los paneles",
+    "markItem": "Marcar o desmarcar el elemento y bajar",
+    "toggle": "Mostrar u ocultar el segundo panel"
   },
   "help": {
     "functionKeys": "Teclas de función",

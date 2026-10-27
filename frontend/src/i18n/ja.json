@@ -75,7 +75,11 @@
     "showInOtherPane": "このフォルダーをもう一方のペインに表示",
     "swapPanes": "ペインを入れ替え",
     "copyToOtherPane": "もう一方のペインにコピー",
-    "moveToOtherPane": "もう一方のペインに移動"
+    "moveToOtherPane": "もう一方のペインに移動",
+    "shortcuts": "2つのペイン",
+    "switchPane": "ペインを切り替え",
+    "markItem": "項目のマークを切り替えて下へ移動",
+    "toggle": "2つ目のペインを表示または非表示"
   },
   "help": {
     "functionKeys": "ファンクションキー",

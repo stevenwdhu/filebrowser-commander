@@ -75,7 +75,11 @@
     "showInOtherPane": "Afișează acest dosar în celălalt panou",
     "swapPanes": "Inversează panourile",
     "copyToOtherPane": "Copiază în celălalt panou",
-    "moveToOtherPane": "Mută în celălalt panou"
+    "moveToOtherPane": "Mută în celălalt panou",
+    "shortcuts": "Două panouri",
+    "switchPane": "Comută între panouri",
+    "markItem": "Marchează sau demarchează elementul și coboară",
+    "toggle": "Afișează sau ascunde al doilea panou"
   },
   "help": {
     "functionKeys": "Taste Funcție",

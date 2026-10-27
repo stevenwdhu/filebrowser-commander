@@ -228,18 +228,68 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+  gap: 0.5em;
   height: 2.5em;
-  padding: 0 1em;
+  padding: 0 0.5em 0 1em;
   border-top: 1px solid var(--divider);
   background-color: var(--panel-bg);
   color: var(--textSecondary);
   font-size: 0.9em;
   white-space: nowrap;
+  container-type: inline-size;
 }
 
-.dual-pane-footer span {
+.dual-pane-footer-summary {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dual-pane-keybar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.25em;
+}
+
+.dual-pane-keybar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  min-height: 1.9em;
+  padding: 0 0.4em;
+  border: 0;
+  border-radius: calc(var(--borderRadius) / 2);
+  background: none;
+  color: var(--textPrimary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dual-pane-keybar-button:hover {
+  background: var(--hoverOverlay);
+  transform: none;
+}
+
+.dual-pane-keybar-button:focus-visible {
+  outline: 2px solid var(--primaryColor);
+  outline-offset: -2px;
+}
+
+.dual-pane-keybar kbd {
+  padding: 0 0.3em;
+  border: 1px solid var(--divider);
+  border-radius: 3px;
+  color: var(--textSecondary);
+  font-family: inherit;
+  font-size: 0.85em;
+}
+
+/* Narrow pane: keys only */
+@container (width < 36rem) {
+  .dual-pane-keybar-label {
+    display: none;
+  }
 }
 
 /* Divider between the panes, over the right pane's left edge */

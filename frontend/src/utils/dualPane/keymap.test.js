@@ -102,6 +102,12 @@ describe("resolveDualPaneKey", () => {
   it("copies and moves to the other pane with F5 and F6 from either pane", () => {
     expect(key({ key: "F5" }, { active: "left" })).toEqual({ cmd: "copyToOther" });
     expect(key({ key: "F6" })).toEqual({ cmd: "moveToOther" });
+    expect(key({ key: "F7" }, { active: "left" })).toEqual({ cmd: "newFolderInActive" });
+    expect(key({ key: "F8" })).toEqual({ cmd: "deleteInActive" });
+    expect(key({ key: "F8" }, { shown: false })).toBeNull();
+    // A held or repeated F7 must not reach the browser's caret browsing behind the prompt
+    expect(key({ key: "F7", repeat: true })).toEqual({ cmd: "noop" });
+    expect(key({ key: "F7" }, { promptOpen: true }, element("<input>"))).toEqual({ cmd: "noop" });
     expect(key({ key: "F5", ctrlKey: true })).toBeNull(); // hard reload stays
     expect(key({ key: "F5" }, { shown: false })).toBeNull();
     // Never a page reload behind the prompt that F5 opened

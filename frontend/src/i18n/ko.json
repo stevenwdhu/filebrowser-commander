@@ -75,7 +75,11 @@
     "showInOtherPane": "이 폴더를 다른 창에 표시",
     "swapPanes": "창 바꾸기",
     "copyToOtherPane": "다른 창으로 복사",
-    "moveToOtherPane": "다른 창으로 이동"
+    "moveToOtherPane": "다른 창으로 이동",
+    "shortcuts": "두 개의 창",
+    "switchPane": "창 사이 전환",
+    "markItem": "항목 표시 또는 해제 후 아래로 이동",
+    "toggle": "두 번째 창 표시 또는 숨기기"
   },
   "help": {
     "functionKeys": "기능 키",

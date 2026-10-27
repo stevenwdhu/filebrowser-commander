@@ -75,7 +75,11 @@
     "showInOtherPane": "Mostrar esta pasta no outro painel",
     "swapPanes": "Trocar painéis",
     "copyToOtherPane": "Copiar para o outro painel",
-    "moveToOtherPane": "Mover para o outro painel"
+    "moveToOtherPane": "Mover para o outro painel",
+    "shortcuts": "Dois painéis",
+    "switchPane": "Alternar entre os painéis",
+    "markItem": "Marcar ou desmarcar o item e descer",
+    "toggle": "Mostrar ou ocultar o segundo painel"
   },
   "help": {
     "functionKeys": "Teclas de Função",

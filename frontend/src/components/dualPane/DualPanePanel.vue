@@ -18,7 +18,23 @@
     </div>
     <DualPaneList ref="list" />
     <footer class="dual-pane-footer">
-      <span>{{ footerText }}</span>
+      <span class="dual-pane-footer-summary">{{ footerText }}</span>
+      <!-- Commander function keys; they act on the active pane, like the keys themselves -->
+      <div class="dual-pane-keybar" role="toolbar" :aria-label="$t('help.functionKeys')">
+        <button
+          v-for="key in functionKeys"
+          :key="key.command"
+          type="button"
+          class="dual-pane-keybar-button"
+          :title="key.title"
+          :aria-label="key.label"
+          @mousedown.prevent
+          @click="runKey(key.command)"
+        >
+          <kbd>{{ key.key }}</kbd>
+          <span class="dual-pane-keybar-label">{{ key.label }}</span>
+        </button>
+      </div>
     </footer>
     <!-- In <body>, so its backdrop covers the header and sidebar too -->
     <Teleport to="body">
@@ -29,11 +45,13 @@
 
 <script>
 import { computed } from "vue";
+import { getters } from "@/store";
 import ListingHeader from "@/components/files/ListingHeader.vue";
 import DualPaneList from "@/components/dualPane/DualPaneList.vue";
 import DualPaneMenu from "@/components/dualPane/DualPaneMenu.vue";
 import DualPanePathBar from "@/components/dualPane/DualPanePathBar.vue";
 import { dualPane, rightSelection, rightViewMode, setActivePane } from "@/store/dualPane.js";
+import { dualPaneCommands } from "@/utils/dualPane/commands.js";
 import { getHumanReadableFilesize } from "@/utils/filesizes";
 import { paneSummary } from "@/utils/dualPane/paneModel.js";
 
@@ -55,6 +73,15 @@ export default {
     },
     menuOpen() {
       return Boolean(dualPane.menu);
+    },
+    functionKeys() {
+      const t = (key) => this.$t(key, { suffix: "" });
+      return [
+        { key: "F5", command: "copyToOther", label: t("general.copy") },
+        { key: "F6", command: "moveToOther", label: t("general.move") },
+        { key: "F7", command: "newFolderInActive", label: t("files.newFolder") },
+        { key: "F8", command: "deleteInActive", label: t("general.delete") },
+      ].map((entry) => ({ ...entry, title: `${entry.key} ${entry.label}` }));
     },
     footerText() {
       const right = dualPane.right;
@@ -80,10 +107,16 @@ export default {
     this.cancelLongPress();
   },
   methods: {
+    runKey(command) {
+      if (getters.currentPromptName()) return;
+      dualPaneCommands[command]({});
+    },
     focusList() {
       this.$refs.list?.focus();
     },
     onKeydown(event) {
+      // An open prompt handles Enter itself (Prompts.vue); a button focused behind it must not
+      if (getters.currentPromptName()) return;
       const target = event.target;
       const tag = target?.tagName?.toLowerCase();
       const isControl = tag === "button" || tag === "a" || target?.getAttribute?.("role") === "button";

@@ -248,7 +248,11 @@
     "showInOtherPane": "Erakutsi karpeta hau beste panelean",
     "swapPanes": "Trukatu panelak",
     "copyToOtherPane": "Kopiatu beste panelera",
-    "moveToOtherPane": "Eraman beste panelera"
+    "moveToOtherPane": "Eraman beste panelera",
+    "shortcuts": "Bi panel",
+    "switchPane": "Aldatu panelen artean",
+    "markItem": "Markatu edo desmarkatu elementua eta jaitsi",
+    "toggle": "Erakutsi edo ezkutatu bigarren panela"
   },
   "help": {
     "functionKeys": "Funtzio-teklak",

@@ -75,7 +75,11 @@
     "showInOtherPane": "在另一個窗格中顯示此資料夾",
     "swapPanes": "交換窗格",
     "copyToOtherPane": "複製到另一個窗格",
-    "moveToOtherPane": "移動到另一個窗格"
+    "moveToOtherPane": "移動到另一個窗格",
+    "shortcuts": "雙窗格",
+    "switchPane": "在窗格之間切換",
+    "markItem": "標記或取消標記該項目並下移",
+    "toggle": "顯示或隱藏第二窗格"
   },
   "help": {
     "functionKeys": "功能鍵",

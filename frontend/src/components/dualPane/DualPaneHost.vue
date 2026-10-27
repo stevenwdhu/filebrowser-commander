@@ -106,6 +106,12 @@ export default {
     },
   },
   watch: {
+    available: {
+      immediate: true,
+      handler(available) {
+        dualPane.available = available;
+      },
+    },
     shown: {
       immediate: true,
       handler(shown) {
@@ -187,6 +193,7 @@ export default {
     cancelAnimationFrame(this.resizeFrame);
     clearTimeout(this.resizeTimer);
     dualPane.shown = false;
+    dualPane.available = false;
     this.clearLayout();
   },
   methods: {
@@ -246,7 +253,8 @@ export default {
       event.stopPropagation();
     },
     onPointerDown(event) {
-      if (!this.shown) return;
+      // The function-key bar acts on whichever pane is active, so using it doesn't switch panes
+      if (!this.shown || event.target?.closest?.(".dual-pane-keybar")) return;
       const side = paneSideOfElement(event.target);
       if (side) setActivePane(side);
     },

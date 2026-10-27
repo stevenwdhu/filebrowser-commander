@@ -75,7 +75,11 @@
     "showInOtherPane": "Bu klasörü diğer panelde göster",
     "swapPanes": "Panelleri değiştir",
     "copyToOtherPane": "Diğer panele kopyala",
-    "moveToOtherPane": "Diğer panele taşı"
+    "moveToOtherPane": "Diğer panele taşı",
+    "shortcuts": "İki panel",
+    "switchPane": "Paneller arasında geçiş yap",
+    "markItem": "Öğeyi işaretle veya işareti kaldır ve aşağı in",
+    "toggle": "İkinci paneli göster veya gizle"
   },
   "help": {
     "functionKeys": "Fonksiyon Tuşları",

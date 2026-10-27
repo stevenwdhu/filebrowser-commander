@@ -75,7 +75,11 @@
     "showInOtherPane": "Deze map in het andere paneel tonen",
     "swapPanes": "Panelen omwisselen",
     "copyToOtherPane": "Kopiëren naar ander paneel",
-    "moveToOtherPane": "Verplaatsen naar ander paneel"
+    "moveToOtherPane": "Verplaatsen naar ander paneel",
+    "shortcuts": "Twee panelen",
+    "switchPane": "Wisselen tussen de panelen",
+    "markItem": "Item markeren of demarkeren en omlaag gaan",
+    "toggle": "Tweede paneel tonen of verbergen"
   },
   "help": {
     "functionKeys": "Functietoetsen",

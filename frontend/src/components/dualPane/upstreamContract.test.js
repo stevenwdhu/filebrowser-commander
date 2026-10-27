@@ -14,6 +14,7 @@ import Scrollbar from "@/components/files/Scrollbar.vue?raw";
 import Shelf from "@/components/Shelf.vue?raw";
 import StatusBar from "@/components/StatusBar.vue?raw";
 import PathPicker from "@/components/prompts/PathPicker.vue?raw";
+import Help from "@/components/prompts/Help.vue?raw";
 import Mutations from "@/store/mutations.ts?raw";
 import Url from "@/utils/url.js?raw";
 
@@ -24,6 +25,7 @@ describe("upstream contract for the dual pane", () => {
   it("mounts the host after #main and the toggle before the view switch", () => {
     expect(Layout).toMatch(/<Scrollbar id="main"[\s\S]*<\/Scrollbar>\s*<DualPaneHost v-if="isLoggedIn" \/>/);
     expect(DefaultBar).toMatch(/<DualPaneToggle \/>\s*<action\s+v-if="showHeaderSwitchView/);
+    expect(Help).toMatch(/<DualPaneHelpSection \/>\s*<\/div>\s*<\/div>\s*<div class="card-actions">/);
   });
 
   it("still positions the left pane's pieces the way dualPane.css overrides them", () => {

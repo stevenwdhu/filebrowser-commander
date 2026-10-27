@@ -75,7 +75,11 @@
     "showInOtherPane": "Diesen Ordner im anderen Bereich anzeigen",
     "swapPanes": "Bereiche tauschen",
     "copyToOtherPane": "In den anderen Bereich kopieren",
-    "moveToOtherPane": "In den anderen Bereich verschieben"
+    "moveToOtherPane": "In den anderen Bereich verschieben",
+    "shortcuts": "Zwei Bereiche",
+    "switchPane": "Zwischen den Bereichen wechseln",
+    "markItem": "Element markieren oder Markierung aufheben und nach unten gehen",
+    "toggle": "Zweiten Bereich ein- oder ausblenden"
   },
   "help": {
     "functionKeys": "Funktionstasten",

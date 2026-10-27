@@ -248,7 +248,11 @@
     "showInOtherPane": "Show this folder in the other pane",
     "swapPanes": "Swap panes",
     "copyToOtherPane": "Copy to other pane",
-    "moveToOtherPane": "Move to other pane"
+    "moveToOtherPane": "Move to other pane",
+    "shortcuts": "Two panes",
+    "switchPane": "Switch between the panes",
+    "markItem": "Mark or unmark the item and move down",
+    "toggle": "Show or hide the second pane"
   },
   "help": {
     "functionKeys": "Function Keys",

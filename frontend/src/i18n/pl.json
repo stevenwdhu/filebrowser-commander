@@ -75,7 +75,11 @@
     "showInOtherPane": "Pokaż ten folder w drugim panelu",
     "swapPanes": "Zamień panele",
     "copyToOtherPane": "Kopiuj do drugiego panelu",
-    "moveToOtherPane": "Przenieś do drugiego panelu"
+    "moveToOtherPane": "Przenieś do drugiego panelu",
+    "shortcuts": "Dwa panele",
+    "switchPane": "Przełącz między panelami",
+    "markItem": "Zaznacz lub odznacz element i przejdź w dół",
+    "toggle": "Pokaż lub ukryj drugi panel"
   },
   "help": {
     "functionKeys": "Klawisze Funkcji",

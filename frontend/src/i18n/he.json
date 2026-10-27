@@ -75,7 +75,11 @@
     "showInOtherPane": "הצג תיקייה זו בחלונית השנייה",
     "swapPanes": "החלף חלוניות",
     "copyToOtherPane": "העתק לחלונית השנייה",
-    "moveToOtherPane": "העבר לחלונית השנייה"
+    "moveToOtherPane": "העבר לחלונית השנייה",
+    "shortcuts": "שתי חלוניות",
+    "switchPane": "מעבר בין החלוניות",
+    "markItem": "סימון או ביטול סימון של הפריט ומעבר למטה",
+    "toggle": "הצגה או הסתרה של החלונית השנייה"
   },
   "help": {
     "functionKeys": "מקשי פונקציה",

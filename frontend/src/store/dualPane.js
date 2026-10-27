@@ -46,6 +46,7 @@ export const dualPane = reactive({
   ratio: 0.5,
   active: "left", // "left" | "right"
   wideEnough: true,
+  available: false, // Set by DualPaneHost: the window and sidebar leave room for two panes
   shown: false, // Set by DualPaneHost while the pane is on screen
   menu: null, // { x, y, onEntry } while the right pane's menu is open
   drag: null, // { origin: "left" | "right" } while items are dragged from a pane

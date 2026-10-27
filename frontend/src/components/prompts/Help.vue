@@ -169,6 +169,7 @@
           <span>{{ $t("help.media.captions") }}</span>
         </div>
       </div>
+      <DualPaneHelpSection />
     </div>
   </div>
 
@@ -182,9 +183,11 @@
 
 <script>
 import { mutations } from "@/store"; // Import the mutations
+import DualPaneHelpSection from "@/components/dualPane/DualPaneHelpSection.vue";
 
 export default {
   name: "help",
+  components: { DualPaneHelpSection },
   props: {
     promptId: {
       type: [String, Number],

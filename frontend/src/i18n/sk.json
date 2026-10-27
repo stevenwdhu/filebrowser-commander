@@ -75,7 +75,11 @@
     "showInOtherPane": "Zobraziť tento priečinok v druhom paneli",
     "swapPanes": "Vymeniť panely",
     "copyToOtherPane": "Kopírovať do druhého panela",
-    "moveToOtherPane": "Presunúť do druhého panela"
+    "moveToOtherPane": "Presunúť do druhého panela",
+    "shortcuts": "Dva panely",
+    "switchPane": "Prepnúť medzi panelmi",
+    "markItem": "Označiť alebo zrušiť označenie položky a prejsť nadol",
+    "toggle": "Zobraziť alebo skryť druhý panel"
   },
   "help": {
     "functionKeys": "Funkčné Klávesy",

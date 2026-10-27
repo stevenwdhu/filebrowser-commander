@@ -248,7 +248,11 @@
     "showInOtherPane": "Mostra questa cartella nell'altro pannello",
     "swapPanes": "Scambia pannelli",
     "copyToOtherPane": "Copia nell'altro pannello",
-    "moveToOtherPane": "Sposta nell'altro pannello"
+    "moveToOtherPane": "Sposta nell'altro pannello",
+    "shortcuts": "Due pannelli",
+    "switchPane": "Passa da un pannello all'altro",
+    "markItem": "Segna o deseleziona l'elemento e scendi",
+    "toggle": "Mostra o nascondi il secondo pannello"
   },
   "help": {
     "functionKeys": "Tasti funzione",

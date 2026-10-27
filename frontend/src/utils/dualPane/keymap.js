@@ -20,6 +20,12 @@ const LISTING_KEYS = new Set([
   "PageDown",
 ]);
 const NO_KEYS = new Set();
+const COMMANDER_KEYS = new Map([
+  ["F5", "copyToOther"],
+  ["F6", "moveToOther"],
+  ["F7", "newFolderInActive"],
+  ["F8", "deleteInActive"],
+]);
 const BUTTON_KEYS = new Set(["Enter", " "]);
 const SEPARATOR_KEYS = new Set(["ArrowLeft", "ArrowRight", "Home", "End"]);
 
@@ -72,10 +78,9 @@ function resolveGlobal(event, ctx) {
   if (ctrlOrMeta(event) && !event.altKey && !event.shiftKey && shortcutLetter(event) === "u") {
     return { cmd: "swapPanes" };
   }
-  // Commander keys; F5 would otherwise reload the page
-  if (!ctrlOrMeta(event) && !event.altKey && !event.shiftKey) {
-    if (event.key === "F5") return { cmd: "copyToOther" };
-    if (event.key === "F6") return { cmd: "moveToOther" };
+  // Commander keys, for whichever pane is active
+  if (!ctrlOrMeta(event) && !event.altKey && !event.shiftKey && COMMANDER_KEYS.has(event.key)) {
+    return { cmd: COMMANDER_KEYS.get(event.key) };
   }
   return null;
 }
@@ -148,12 +153,13 @@ function resolveRight(event) {
 
 /** The command for a keydown, or null to let the app handle it. */
 export function resolveDualPaneKey(event, ctx) {
-  // With both panes shown F5/F6 copy and move, so they never reload the page instead
-  const commanderKey = (event.key === "F5" || event.key === "F6") && !ctrlOrMeta(event) && !event.altKey && !event.shiftKey;
+  // With both panes shown F5-F8 are the pane's, so the browser's own (reload, caret browsing)
+  // never runs instead, even behind the prompt the first press opened
+  const commanderKey = COMMANDER_KEYS.has(event.key) && !ctrlOrMeta(event) && !event.altKey && !event.shiftKey;
   if (ctx.shown && commanderKey) {
     if (event.repeat || ctx.promptOpen || ctx.searchActive || isEditable(event.target)) return { cmd: "noop" };
-    // The pane menu lists them as shortcuts for its items
-    if (ctx.menuOpen) return { cmd: event.key === "F5" ? "copyToOther" : "moveToOther" };
+    // The pane menu lists F5/F6 as shortcuts for its items
+    if (ctx.menuOpen) return { cmd: COMMANDER_KEYS.get(event.key) };
   }
   if (ctx.promptOpen || ctx.searchActive || isEditable(event.target)) return null;
   // The pane menu keeps keyboard focus: its own buttons handle keys, nothing else reacts

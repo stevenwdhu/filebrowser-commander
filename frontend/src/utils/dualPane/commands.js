@@ -227,6 +227,20 @@ function newFolder() {
   });
 }
 
+// F7 / F8 in the left pane: the same prompts as its own toolbar and Delete key
+function newFolderInLeft() {
+  if (!getters.canCreateInSource(state.req?.source)) return;
+  mutations.showPrompt({
+    name: "newDir",
+    props: { base: { source: state.req.source, path: state.req.path }, redirect: false },
+  });
+}
+
+function deleteInLeft() {
+  if (paneContext("left").items.length === 0 || !getters.sourcePermissions(state.req?.source)?.delete) return;
+  mutations.showPrompt({ name: "delete" });
+}
+
 function typeAhead(key) {
   const right = dualPane.right;
   const items = right.entries
@@ -294,6 +308,8 @@ export const dualPaneCommands = {
   swapPanes,
   copyToOther: () => transferToOther("copy"),
   moveToOther: () => transferToOther("move"),
+  newFolderInActive: () => (dualPane.active === "right" ? newFolder() : newFolderInLeft()),
+  deleteInActive: () => (dualPane.active === "right" ? deleteItems() : deleteInLeft()),
   cursor: ({ step, extend, rows }) => (rows && moveByRows(step, extend)) || rightSelection.move(step, { extend }),
   page: ({ direction, extend }) => moveByRows(direction, extend, { page: true }) || rightSelection.move(direction * pageSize(), { extend }),
   open: () => openEntry(rightEntry()),

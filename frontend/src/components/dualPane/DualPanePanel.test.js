@@ -1,36 +1,42 @@
 import { createApp, h, nextTick } from "vue";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { state, api, url, rowContextMenu, displayPreferences } = vi.hoisted(() => ({
-  state: {
-    user: { username: "alice", singleClick: false, viewMode: "list", gallerySize: 5 },
-    req: { source: "tank", path: "/left/", name: "left", type: "directory", items: [] },
-    selected: [],
-    sources: { info: { tank: {}, backup: {} }, current: "tank" },
-    prompts: [],
-  },
-  api: { fetchFiles: vi.fn() },
-  url: { goToItem: vi.fn(), buildItemUrl: (source, path) => `/files/${source}${path}` },
-  rowContextMenu: vi.fn(),
+const { state, api, url, rowContextMenu, mutations, displayPreferences } = vi.hoisted(() => {
   // { [source]: { [route path]: { viewMode } } }, as state.displayPreferences
-  displayPreferences: {},
-}));
+  const displayPreferences = {};
+  return {
+    mutations: {
+      showPrompt: vi.fn(),
+      closeTopPrompt: vi.fn(),
+      updateDisplayPreferences: vi.fn((payload, location) => {
+        const { source, path } = location || { source: "tank", path: "/files/tank/left/" };
+        displayPreferences[source] = { ...displayPreferences[source], [path]: { ...displayPreferences[source]?.[path], ...payload } };
+      }),
+    },
+    state: {
+      user: { username: "alice", singleClick: false, viewMode: "list", gallerySize: 5 },
+      req: { source: "tank", path: "/left/", name: "left", type: "directory", items: [] },
+      selected: [],
+      sources: { info: { tank: {}, backup: {} }, current: "tank" },
+      prompts: [],
+    },
+    api: { fetchFiles: vi.fn() },
+    url: { goToItem: vi.fn(), buildItemUrl: (source, path) => `/files/${source}${path}` },
+    rowContextMenu: vi.fn(),
+    displayPreferences,
+  };
+});
 vi.mock("@/store", () => ({
   state,
   getters: {
     pickerSorting: () => ({ by: "name", asc: true }),
     sourcePermissions: () => ({ create: true, modify: true, delete: true, download: true }),
+    canCreateInSource: () => true,
+    currentPromptName: () => state.prompts.at(-1)?.name ?? null,
     displayPreferenceFor: (source, path) => displayPreferences[source]?.[path] || null,
     viewMode: () => "compact",
   },
-  mutations: {
-    showPrompt: vi.fn(),
-    closeTopPrompt: vi.fn(),
-    updateDisplayPreferences: vi.fn((payload, location) => {
-      const { source, path } = location || { source: "tank", path: "/files/tank/left/" };
-      displayPreferences[source] = { ...displayPreferences[source], [path]: { ...displayPreferences[source]?.[path], ...payload } };
-    }),
-  },
+  mutations,
 }));
 vi.mock("@/api", () => ({ resourcesApi: api }));
 vi.mock("@/notify", () => ({ notify: { showError: vi.fn() } }));
@@ -58,7 +64,6 @@ vi.mock("@/components/files/ListingItem.vue", () => ({
     },
   },
 }));
-import { mutations } from "@/store/index.ts";
 import {
   activePaneViewMode,
   dualPane,
@@ -113,7 +118,7 @@ describe("DualPanePanel", () => {
   it("lists the folder and sums it up in the footer", async () => {
     await mount();
     expect([...root.querySelectorAll(".listing-item")].map((el) => el.dataset.name)).toEqual(["..", "pics", "a.txt", "b.txt"]);
-    expect(root.querySelector(".dual-pane-footer").textContent).toBe("1 general.folder | 2 general.files (7.0 bytes)");
+    expect(root.querySelector(".dual-pane-footer-summary").textContent).toBe("1 general.folder | 2 general.files (7.0 bytes)");
   });
 
   it("selects with clicks, makes the pane active and keeps the click from the left listing", async () => {
@@ -127,7 +132,7 @@ describe("DualPanePanel", () => {
     expect(selectedNames()).toEqual(["a.txt", "b.txt"]);
     expect(dualPane.active).toBe("right");
     expect(windowClick).not.toHaveBeenCalled();
-    expect(root.querySelector(".dual-pane-footer").textContent).toBe("2 general.selectionMultiple (3.0 bytes)");
+    expect(root.querySelector(".dual-pane-footer-summary").textContent).toBe("2 general.selectionMultiple (3.0 bytes)");
     window.removeEventListener("click", windowClick);
   });
 
@@ -163,6 +168,47 @@ describe("DualPanePanel", () => {
     row("..").dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await nextTick();
     expect(labels()[0]).toBe("create_new_folderfiles.newFolder");
+  });
+
+  it("has function keys that act on the active pane", async () => {
+    state.req = {
+      source: "tank",
+      path: "/left/",
+      name: "left",
+      type: "directory",
+      items: [{ name: "x.txt", path: "/left/x.txt", type: "text/plain", size: 5 }],
+    };
+    state.selected = [0];
+    await mount();
+    const keys = [...root.querySelectorAll(".dual-pane-keybar-button")];
+    expect(keys.map((button) => button.querySelector("kbd").textContent)).toEqual(["F5", "F6", "F7", "F8"]);
+    keys[0].click(); // left is active: copy its selection into the right pane's folder
+    expect(mutations.showPrompt).toHaveBeenLastCalledWith({
+      name: "copy",
+      props: {
+        operation: "copy",
+        items: [{ path: "/left/x.txt", source: "tank", name: "x.txt", type: "text/plain", size: 5 }],
+        destination: { source: "tank", path: "/docs/" },
+      },
+    });
+    keys[2].click();
+    expect(mutations.showPrompt).toHaveBeenLastCalledWith({ name: "newDir", props: { base: { source: "tank", path: "/left/" }, redirect: false } });
+    setActivePane("right");
+    keys[2].click();
+    expect(mutations.showPrompt).toHaveBeenLastCalledWith({ name: "newDir", props: { base: { source: "tank", path: "/docs/" }, redirect: false } });
+
+    // With that prompt open, Enter on the focused button belongs to the prompt and the bar does nothing
+    state.prompts.push({ name: "newDir" });
+    const windowKeydown = vi.fn();
+    window.addEventListener("keydown", windowKeydown);
+    keys[2].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(windowKeydown).toHaveBeenCalledOnce();
+    window.removeEventListener("keydown", windowKeydown);
+    const calls = mutations.showPrompt.mock.calls.length;
+    keys[3].click();
+    expect(mutations.showPrompt.mock.calls.length).toBe(calls);
+    state.prompts.pop();
+    state.selected = [];
   });
 
   it("shows when a folder can't be read", async () => {

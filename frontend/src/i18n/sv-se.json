@@ -75,7 +75,11 @@
     "showInOtherPane": "Visa den här mappen i andra panelen",
     "swapPanes": "Byt plats på paneler",
     "copyToOtherPane": "Kopiera till andra panelen",
-    "moveToOtherPane": "Flytta till andra panelen"
+    "moveToOtherPane": "Flytta till andra panelen",
+    "shortcuts": "Två paneler",
+    "switchPane": "Växla mellan panelerna",
+    "markItem": "Markera eller avmarkera objektet och gå nedåt",
+    "toggle": "Visa eller dölj andra panelen"
   },
   "help": {
     "functionKeys": "Funktionstangenter",
