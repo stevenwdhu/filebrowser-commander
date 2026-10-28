@@ -17,25 +17,7 @@
       <ListingHeader use-picker-sorting />
     </div>
     <DualPaneList ref="list" />
-    <footer class="dual-pane-footer">
-      <span class="dual-pane-footer-summary">{{ footerText }}</span>
-      <!-- Commander function keys; they act on the active pane, like the keys themselves -->
-      <div class="dual-pane-keybar" role="toolbar" :aria-label="$t('help.functionKeys')">
-        <button
-          v-for="key in functionKeys"
-          :key="key.command"
-          type="button"
-          class="dual-pane-keybar-button"
-          :title="key.title"
-          :aria-label="key.label"
-          @mousedown.prevent
-          @click="runKey(key.command)"
-        >
-          <kbd>{{ key.key }}</kbd>
-          <span class="dual-pane-keybar-label">{{ key.label }}</span>
-        </button>
-      </div>
-    </footer>
+    <DualPaneStatusLine pane="right" />
     <!-- In <body>, so its backdrop covers the header and sidebar too -->
     <Teleport to="body">
       <DualPaneMenu v-if="menuOpen" />
@@ -50,10 +32,8 @@ import ListingHeader from "@/components/files/ListingHeader.vue";
 import DualPaneList from "@/components/dualPane/DualPaneList.vue";
 import DualPaneMenu from "@/components/dualPane/DualPaneMenu.vue";
 import DualPanePathBar from "@/components/dualPane/DualPanePathBar.vue";
+import DualPaneStatusLine from "@/components/dualPane/DualPaneStatusLine.vue";
 import { dualPane, rightSelection, rightViewMode, setActivePane } from "@/store/dualPane.js";
-import { dualPaneCommands } from "@/utils/dualPane/commands.js";
-import { getHumanReadableFilesize } from "@/utils/filesizes";
-import { paneSummary } from "@/utils/dualPane/paneModel.js";
 
 const LONG_PRESS_MS = 500;
 // Keys a focused toolbar button or sort header handles natively; the left listing must not see them
@@ -61,7 +41,7 @@ const CONTROL_KEYS = new Set([" ", "Enter"]);
 
 export default {
   name: "DualPanePanel",
-  components: { ListingHeader, DualPaneList, DualPaneMenu, DualPanePathBar },
+  components: { ListingHeader, DualPaneList, DualPaneMenu, DualPanePathBar, DualPaneStatusLine },
   // The header, rows and icons follow this folder's layout rather than the main listing's
   provide: () => ({ listingViewMode: computed(rightViewMode) }),
   data: () => ({
@@ -74,43 +54,11 @@ export default {
     menuOpen() {
       return Boolean(dualPane.menu);
     },
-    functionKeys() {
-      const t = (key) => this.$t(key, { suffix: "" });
-      return [
-        { key: "F5", command: "copyToOther", label: t("general.copy") },
-        { key: "F6", command: "moveToOther", label: t("general.move") },
-        { key: "F7", command: "newFolderInActive", label: t("files.newFolder") },
-        { key: "F8", command: "deleteInActive", label: t("general.delete") },
-      ].map((entry) => ({ ...entry, title: `${entry.key} ${entry.label}` }));
-    },
-    footerText() {
-      const right = dualPane.right;
-      const summary = paneSummary(right.entries, right.selected);
-      if (summary.selectedCount > 0) {
-        const label = summary.selectedCount === 1 ? this.$t("general.selectionSingle") : this.$t("general.selectionMultiple");
-        return `${summary.selectedCount} ${label} (${getHumanReadableFilesize(summary.selectedBytes)})`;
-      }
-      if (summary.dirs === 0 && summary.files === 0) {
-        return "";
-      }
-      const parts = [];
-      if (summary.dirs > 0) {
-        parts.push(`${summary.dirs} ${summary.dirs === 1 ? this.$t("general.folder") : this.$t("general.folders")}`);
-      }
-      if (summary.files > 0) {
-        parts.push(`${summary.files} ${summary.files === 1 ? this.$t("general.file") : this.$t("general.files")}`);
-      }
-      return `${parts.join(" | ")} (${getHumanReadableFilesize(summary.bytes)})`;
-    },
   },
   beforeUnmount() {
     this.cancelLongPress();
   },
   methods: {
-    runKey(command) {
-      if (getters.currentPromptName()) return;
-      dualPaneCommands[command]({});
-    },
     focusList() {
       this.$refs.list?.focus();
     },
@@ -137,6 +85,8 @@ export default {
       dualPane.menu = { x, y, onEntry };
     },
     onContextMenu(event) {
+      // The status line has no menu, as the left pane's has none
+      if (event.target.closest?.(".dual-pane-status")) return;
       const row = event.target.closest?.(".listing-item");
       this.openMenuAt(event.clientX, event.clientY, row);
     },
@@ -144,7 +94,7 @@ export default {
       this.cancelLongPress();
       const touch = event.touches?.[0];
       const row = event.target.closest?.(".listing-item");
-      if (!touch) return;
+      if (!touch || event.target.closest?.(".dual-pane-status")) return;
       this.longPressTimer = setTimeout(() => this.openMenuAt(touch.clientX, touch.clientY, row), LONG_PRESS_MS);
     },
     cancelLongPress() {

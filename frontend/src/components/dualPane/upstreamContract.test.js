@@ -35,6 +35,31 @@ describe("upstream contract for the dual pane", () => {
     expect(baseCss).toMatch(/#main \{[^}]*position: fixed;[^}]*width: 100%;/);
     expect(Shelf).toContain('id="shelf"');
     expect(StatusBar).toContain('id="status-bar"');
+    // The bottom bar: the function keys go into the status bar's row, beside the size slider and
+    // instead of its summary, and the bar is always mounted for them to go into
+    expect(StatusBar).toMatch(/<div class="status-content"[^>]*>\s*<!--[^>]*-->\s*<div class="status-info">/);
+    expect(StatusBar).toContain('<div class="status-controls">');
+    expect(StatusBar).not.toMatch(/<div (id="status-bar"|class="status-content")[^>]*\bv-(if|show)=/);
+    expect(StatusBar).toMatch(/\.status-content \{\s*display: flex;\s*align-items: center;\s*justify-content: space-between;/);
+    expect(StatusBar).toMatch(/#status-bar \{[^}]*height: 2\.5em;[^}]*left: 0;\s*right: 0;/);
+    expect(Layout).toContain('<StatusBar :class="{ moveWithSidebar: moveWithSidebar.shouldMove }" />');
+    // The listing's room for the status bar, its selected rows' scroll margin and its upload frame,
+    // which dualPane.css adds the left status line to
+    expect(listingCss).toMatch(/\.listing-items \{[^}]*padding-bottom: 3em;/);
+    expect(listingCss).toMatch(/\.listing-item\[aria-selected="true"\] \{[^}]*scroll-margin-bottom: 3em;/);
+    expect(ListingView).toMatch(/\.drop-indicator \{[^}]*bottom: 2\.5em;/);
+    // Its rectangle selection ends at the left status line while both panes are shown
+    expect(ListingView.match(/const statusBar = listingBottomBar\(\);/g)).toHaveLength(2);
+    // The left status line counts the selection as the status bar does (store/dualPane.js paneSelectionTotals)
+    expect(StatusBar).toContain("state.selected.find((entry) => typeof entry !== 'number')?.heldSelected ?? state.selected");
+    expect(ListingItem).toContain('heldSelected: state.selected.filter((entry) => typeof entry === "number"),');
+    // The right pane, the key bar and the status lines keep clicks and keys from these by stopping
+    // them on the way up
+    expect(ListingView).toContain('window.addEventListener("keydown", this.keyEvent);');
+    expect(ListingView).toContain('window.addEventListener("click", this.clickClear);');
+    // The thumb's travel, which dualPane.css shortens by the left pane's bars
+    expect(Scrollbar).toContain("const maxThumbTop = scrollbar.clientHeight - thumbHeight - this.getBottomOffset();");
+    expect(Scrollbar).toMatch(/\.custom-scrollbar \{\s*position: absolute;\s*top: 0;\s*right: 0;\s*height: 100%;/);
     expect(Scrollbar).toMatch(/\.thumb \{[^}]*position: fixed;/);
     expect(Scrollbar).toContain("thumb-section-id");
     expect(ListingView).toContain('this.width = document.getElementById("main")?.offsetWidth || window.innerWidth;');

@@ -33,6 +33,8 @@ const SEPARATOR_KEYS = new Set(["ArrowLeft", "ArrowRight", "Home", "End"]);
 function isEditable(target) {
   if (!target?.tagName) return false;
   const tag = target.tagName.toLowerCase();
+  // A slider takes no typing, so the Commander keys still work on it
+  if (tag === "input" && target.type === "range") return false;
   return tag === "input" || tag === "textarea" || tag === "select" || Boolean(target.isContentEditable);
 }
 
@@ -192,6 +194,9 @@ export function resolveDualPaneKey(event, ctx) {
   if (event.repeat && !REPEATABLE.has(event.key)) return null;
   const global = resolveGlobal(event, ctx);
   if (global || !ctx.shown) return global;
+  // The bottom bar (the app's status bar) is under both panes; its slider and keys keep the rest of
+  // their keys, which DualPaneKeyBar also keeps from the left listing
+  if (event.target?.closest?.("#status-bar")) return null;
   if (nativeKeys(event.target).has(event.key)) return null;
   if (ctx.active !== "right") return resolveLeft(event, ctx.leftParent);
   const command = resolveRight(event);

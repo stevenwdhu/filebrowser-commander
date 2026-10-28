@@ -26,6 +26,10 @@ import {
   otherPaneContext,
   otherPaneDestination,
   paneContext,
+  listingBottomBar,
+  paneSelectionTotals,
+  paneSideOfElement,
+  paneTotals,
   refreshRight,
   rightSelection,
   setActivePane,
@@ -223,5 +227,61 @@ describe("dual-pane store", () => {
     expect(paneContext("right").items.map((item) => item.name)).toEqual(["two.txt"]);
     setActivePane("right");
     expect(otherPaneContext().side).toBe("left");
+  });
+
+  it("sums up each pane for its status line, the left one as the app's status bar does", async () => {
+    store().req = {
+      source: "tank",
+      path: "/docs/",
+      type: "directory",
+      items: [
+        { name: "pics", path: "/docs/pics/", type: "directory", size: 4 },
+        { name: "a.txt", path: "/docs/a.txt", type: "text/plain", size: 3 },
+        { name: "b.txt", path: "/docs/b.txt", type: "text/plain", size: 5 },
+      ],
+    };
+    expect(paneTotals("left")).toEqual({ dirs: 1, files: 2, bytes: 12 });
+    expect(paneSelectionTotals("left")).toEqual({ count: 0, bytes: 0 });
+    store().selected = [1, 2];
+    expect(paneSelectionTotals("left")).toEqual({ count: 2, bytes: 8 });
+    // A prompt's file list holding the listing's selection meanwhile, and an item picked from elsewhere
+    store().selected = [{ heldSelected: [0] }];
+    expect(paneSelectionTotals("left")).toEqual({ count: 1, bytes: 4 });
+    store().selected = [2, { path: "/elsewhere.txt", size: 7 }];
+    expect(paneSelectionTotals("left")).toEqual({ count: 2, bytes: 12 });
+
+    api.fetchFiles.mockResolvedValue(folder("/x/", ["one.txt", "two.txt", "sub"]));
+    await openRight("backup", "/x/");
+    expect(paneTotals("right")).toEqual({ dirs: 1, files: 2, bytes: 3 });
+    expect(paneSelectionTotals("right")).toEqual({ count: 0, bytes: 0 });
+    rightSelection.selectOnly("/x/one.txt");
+    expect(paneSelectionTotals("right")).toEqual({ count: 1, bytes: 1 });
+  });
+
+  it("ends the left listing's rectangle selection at the left status line while both panes are shown", () => {
+    const root = document.createElement("div");
+    root.innerHTML = '<div class="dual-pane-status dual-pane-left-status"></div><div id="status-bar"></div>';
+    document.body.append(root);
+    expect(listingBottomBar()).toBe(root.querySelector(".dual-pane-left-status"));
+    dualPane.shown = false;
+    expect(listingBottomBar()).toBe(root.querySelector("#status-bar"));
+    root.remove();
+  });
+
+  it("puts each status line in its pane and the bottom bar in neither", () => {
+    const root = document.createElement("div");
+    root.innerHTML = `
+      <div id="main"><a class="listing-item">a</a></div>
+      <div class="dual-pane-status dual-pane-left-status"><span class="left-text">2 files</span></div>
+      <section class="dual-pane-right"><div class="dual-pane-status"><span class="right-text">3 files</span></div></section>
+      <div id="status-bar"><div class="status-content"><div class="dual-pane-keybar"><button>F5</button></div><input type="range"></div></div>`;
+    document.body.append(root);
+    const $ = (selector) => root.querySelector(selector);
+    expect(paneSideOfElement($("#main a"))).toBe("left");
+    expect(paneSideOfElement($(".left-text"))).toBe("left");
+    expect(paneSideOfElement($(".right-text"))).toBe("right");
+    expect(paneSideOfElement($("#status-bar button"))).toBeNull();
+    expect(paneSideOfElement($("#status-bar input"))).toBeNull();
+    root.remove();
   });
 });

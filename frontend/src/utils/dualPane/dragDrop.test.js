@@ -46,7 +46,10 @@ function layout() {
       <div class="listing-item" data-path="/" data-dir="true">..</div>
       <div class="listing-item" data-path="/r/pics/" data-dir="true">pics</div>
       <div class="listing-item" data-path="/r/b.txt" data-dir="false">b.txt</div>
-    </div><div class="dual-pane-pathbar"><button class="dual-pane-pathbar-crumb" data-path="/r/">r</button></div></section>
+    </div><div class="dual-pane-pathbar"><button class="dual-pane-pathbar-crumb" data-path="/r/">r</button></div>
+    <div class="dual-pane-status"><span class="right-text">2 files</span></div></section>
+    <div class="dual-pane-status dual-pane-left-status"><span class="left-text">2 files</span></div>
+    <div id="status-bar"><div class="status-content"><div class="dual-pane-keybar"><button>F5</button></div><input type="range"></div></div>
     <div class="dual-pane-pathbar dual-pane-left-bar">
       <button class="dual-pane-pathbar-source">tank</button>
       <button class="dual-pane-pathbar-crumb" data-path="/"><i>home</i></button>
@@ -116,6 +119,15 @@ describe("pane drag and drop", () => {
     // The rest of the left bar is the left pane, like its empty space
     expect(dropTarget($(".dual-pane-left-bar .dual-pane-pathbar-source"), "right").folder).toEqual({ source: "tank", path: "/left/" });
     expect(dropTarget($(".dual-pane-left-bar .dual-pane-pathbar-source"), "left")).toBeNull();
+  });
+
+  it("takes drops on a pane's status line as on its empty space, and none on the bottom bar", () => {
+    expect(dropTarget($(".left-text"), "right").folder).toEqual({ source: "tank", path: "/left/" });
+    expect(dropTarget($(".right-text"), "left").folder).toEqual({ source: "backup", path: "/r/" });
+    expect(dropTarget($(".right-text"), "right")).toEqual({ blocked: true });
+    // The keys and the slider are under both panes
+    expect(dropTarget($("#status-bar button"), "right")).toEqual({ blocked: true });
+    expect(dropTarget($("#status-bar input"), "left")).toBeNull();
   });
 
   it("moves the left selection up a folder when it's dropped on the left '..', through the prompt", () => {

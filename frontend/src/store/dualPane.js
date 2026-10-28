@@ -12,6 +12,7 @@ import {
   clickSelect,
   moveCursor,
   operationTargets,
+  paneSummary,
   parentDir,
   reconcileAfterLoad,
   selectAll,
@@ -363,10 +364,52 @@ export function otherPaneDestination(items) {
   return left.source ? left : null;
 }
 
-/** Which pane an element belongs to, or null for the header, sidebar and prompts. */
+function leftItems() {
+  return Array.isArray(state.req?.items) ? state.req.items : [];
+}
+
+/** A pane's folders, files and bytes, for its status line. */
+export function paneTotals(side) {
+  const { dirs, files, bytes } = paneSummary(side === "right" ? dualPane.right.entries : leftItems(), []);
+  return { dirs, files, bytes };
+}
+
+/**
+ * How many items a pane's status line counts as selected, and their bytes; apart from paneTotals,
+ * so a selection change doesn't sum up the whole folder again. The left pane's are counted as
+ * StatusBar counts them, with the selection a prompt's file list may be holding meanwhile.
+ */
+export function paneSelectionTotals(side) {
+  if (side === "right") {
+    const { selectedCount, selectedBytes } = paneSummary(dualPane.right.entries, dualPane.right.selected);
+    return { count: selectedCount, bytes: selectedBytes };
+  }
+  const items = leftItems();
+  const selected = state.selected || [];
+  const totals = { count: 0, bytes: 0 };
+  for (const entry of selected.find((candidate) => typeof candidate !== "number")?.heldSelected ?? selected) {
+    const item = typeof entry === "number" ? items.at(entry) : entry;
+    totals.count++;
+    totals.bytes += item?.size || 0;
+  }
+  return totals;
+}
+
+/**
+ * The bar the left listing's rows end above, which ListingView clamps its rectangle selection to:
+ * the left status line while both panes are shown, else the app's status bar.
+ */
+export function listingBottomBar() {
+  return (dualPane.shown && document.querySelector(".dual-pane-left-status")) || document.getElementById("status-bar");
+}
+
+/**
+ * Which pane an element belongs to, or null for the header, sidebar, prompts and the bottom bar,
+ * which is under both panes.
+ */
 export function paneSideOfElement(element) {
   if (!element?.closest) return null;
   if (element.closest(".dual-pane-right")) return "right";
-  if (element.closest("#main, #status-bar, #shelf, .dual-pane-left-bar")) return "left";
+  if (element.closest("#main, #shelf, .dual-pane-left-bar, .dual-pane-left-status")) return "left";
   return null;
 }

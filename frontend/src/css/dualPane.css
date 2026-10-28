@@ -5,6 +5,9 @@
 :root {
   --dual-pane-width: 0px;
   --dual-pane-bar-height: 2.75em;
+  /* The bottom bar under both panes (the app's status bar) and each pane's status line above it */
+  --dual-pane-bottom-bar-height: 2.5em;
+  --dual-pane-status-height: 2em;
 }
 
 /* Left pane: the normal listing, narrowed, and below its path bar (DualPaneHost), which replaces
@@ -12,11 +15,28 @@
 html.dual-pane #main {
   width: calc(100% - var(--dual-pane-width));
   padding-top: calc(var(--header-height) + var(--dual-pane-bar-height));
+  /* A row the keyboard selects scrolls into view above the left status line too: the listing's
+     3em scroll margin clears only the bottom bar */
+  scroll-padding-bottom: var(--dual-pane-status-height);
 }
 
-html.dual-pane #shelf,
+/* The app's status bar spans both panes as their bottom bar: the function keys (DualPaneKeyBar)
+   and the size slider. Each pane's own status line, above it, sums the pane up instead. The panes
+   end above it, so it stays put while a folder loads, where upstream slides it away, and it's
+   opaque, so the left listing's rows don't show through half of it. */
 html.dual-pane #status-bar {
-  right: var(--dual-pane-width);
+  bottom: 0;
+  height: var(--dual-pane-bottom-bar-height);
+  border-top: 1px solid var(--divider);
+  background-color: var(--background);
+  background-image: linear-gradient(var(--panel-bg), var(--panel-bg));
+  backdrop-filter: none;
+  pointer-events: auto;
+  transition: left 0.2s ease, width 0.2s ease;
+}
+
+html.dual-pane #status-bar .status-info {
+  display: none;
 }
 
 /* The shelf with the column headers is spaced like the right pane's header */
@@ -25,7 +45,20 @@ html.dual-pane #breadcrumbs {
 }
 
 html.dual-pane #shelf {
+  right: var(--dual-pane-width);
   padding-top: 0.25em;
+}
+
+/* The listing leaves 3em at its end for the status bar; its rows end the same 0.5em above the left
+   status line as the right pane's do above theirs */
+html.dual-pane #main .listing-items {
+  padding-bottom: calc(3em + var(--dual-pane-status-height));
+}
+
+/* An upload dragged over the left listing: its frame ends above the left status line, as it ends
+   above the status bar */
+html.dual-pane #main .drop-indicator {
+  bottom: calc(2.5em + var(--dual-pane-status-height));
 }
 
 /* ListingView pads by inline style for the breadcrumbs it expects outside the root. This puts the
@@ -56,6 +89,12 @@ html.dual-pane #main .thumb-section-id {
   right: calc(var(--dual-pane-width) + 3em);
 }
 
+/* The thumb travels the track's height less a margin for the status bar (Scrollbar.vue); with the
+   track that much shorter, it stops above the left status line as it stops above the status bar */
+html.dual-pane #main .custom-scrollbar {
+  height: calc(100% - var(--dual-pane-bar-height) - var(--dual-pane-status-height));
+}
+
 html.dual-pane-resizing,
 html.dual-pane-resizing * {
   cursor: col-resize !important;
@@ -68,7 +107,7 @@ html.dual-pane-resizing * {
   position: fixed;
   top: var(--header-height);
   right: 0;
-  bottom: 0;
+  bottom: var(--dual-pane-bottom-bar-height);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -192,7 +231,8 @@ html.dual-pane-resizing * {
   font-size: 1.2em;
 }
 
-.dual-pane-list {
+/* Its padding outweighs the listing's 3em for the status bar, which this pane ends above */
+.listing-items.dual-pane-list {
   flex: 1 1 auto;
   min-height: 0;
   padding: 0.3em 0.5em 0.5em;
@@ -299,47 +339,57 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
   font-size: 2.2em;
 }
 
-/* One row when the summary and the keys fit side by side; otherwise the keys wrap onto a row of their own */
-.dual-pane-footer {
+/* Each pane's status line, level with the other's. The text is smaller, not the line, whose em
+   heights must stay those of the bars around it. */
+.dual-pane-status {
   display: flex;
   flex: 0 0 auto;
-  flex-wrap: wrap;
   align-items: center;
-  column-gap: 0.5em;
-  min-height: 2.5em;
-  padding: 0 0.5em 0 1em;
+  box-sizing: border-box;
+  height: var(--dual-pane-status-height);
+  padding: 0 1em;
   border-top: 1px solid var(--divider);
-  background-color: var(--panel-bg);
+  background: var(--background);
   color: var(--textSecondary);
-  font-size: 0.9em;
+}
+
+.dual-pane-status-text {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.85em;
+  font-weight: 500;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dual-pane-footer-summary {
-  flex: 1 1 12em;
-  min-width: 0;
-  overflow: hidden;
-  line-height: 2.5em;
-  text-overflow: ellipsis;
+.dual-pane-left-status {
+  position: fixed;
+  right: var(--dual-pane-width);
+  bottom: var(--dual-pane-bottom-bar-height);
+  z-index: 2;
+  padding-left: calc(1em + var(--safe-area-left));
+  transition: left 0.2s ease;
 }
 
-/* In a pane too narrow even for that row, the keys wrap rather than lose their names */
+/* In the bottom bar, ahead of the size slider. The bar keeps one row; in one too narrow for the
+   names, they shorten rather than run under the slider (each key's title has it in full). */
 .dual-pane-keybar {
   display: flex;
   flex: 0 1 auto;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  order: -1;
   gap: 0.25em;
   min-width: 0;
-  margin-left: auto;
-  padding-bottom: 0.3em;
-  padding-top: 0.3em;
+  margin-left: -0.2em; /* F5 lines up with the status lines' text */
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .dual-pane-keybar-button {
   display: inline-flex;
+  flex: 0 1 auto;
   align-items: center;
   gap: 0.3em;
+  min-width: 0;
   min-height: 1.9em;
   padding: 0 0.4em;
   border: 0;
@@ -360,7 +410,14 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
   outline-offset: -2px;
 }
 
+.dual-pane-keybar-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .dual-pane-keybar kbd {
+  flex: none;
   padding: 0 0.3em;
   border: 1px solid var(--divider);
   border-radius: 3px;
@@ -370,12 +427,12 @@ html[data-dual-pane-active="right"] #main .listing-item[aria-selected="true"] {
 }
 
 
-/* Divider between the panes, over the right pane's left edge */
+/* Divider between the panes, over the right pane's left edge, down to the bottom bar */
 .dual-pane-divider {
   position: fixed;
   top: var(--header-height);
   right: calc(var(--dual-pane-width) - 4px);
-  bottom: 0;
+  bottom: var(--dual-pane-bottom-bar-height);
   z-index: 3;
   width: 8px;
   cursor: col-resize;

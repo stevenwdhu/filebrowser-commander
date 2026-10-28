@@ -20,6 +20,13 @@
       @keydown.left.prevent.stop="stepRatio(0.05)"
       @keydown.right.prevent.stop="stepRatio(-0.05)"
     ></div>
+    <!-- The left pane's status line, level with the right pane's -->
+    <DualPaneStatusLine v-show="shown" pane="left" class="dual-pane-left-status" :style="{ left: sidebarOffset }" />
+    <!-- The function keys join the size slider in the app's status bar, which dualPane.css turns
+         into the bottom bar under both panes. Deferred: the bar comes after this host in Layout. -->
+    <Teleport defer to="#status-bar .status-content">
+      <DualPaneKeyBar v-show="shown" />
+    </Teleport>
   </template>
 </template>
 
@@ -29,8 +36,10 @@ import { toRaw } from "vue";
 import { getters, mutations, state } from "@/store";
 import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
 import { eventBus } from "@/store/eventBus";
+import DualPaneKeyBar from "@/components/dualPane/DualPaneKeyBar.vue";
 import DualPanePanel from "@/components/dualPane/DualPanePanel.vue";
 import DualPanePathBar from "@/components/dualPane/DualPanePathBar.vue";
+import DualPaneStatusLine from "@/components/dualPane/DualPaneStatusLine.vue";
 import {
   cursorHidden,
   dualPane,
@@ -61,7 +70,7 @@ const TRAILING_RESIZE_MS = 150;
 
 export default {
   name: "DualPaneHost",
-  components: { DualPanePanel, DualPanePathBar },
+  components: { DualPaneKeyBar, DualPanePanel, DualPanePathBar, DualPaneStatusLine },
   data: () => ({
     lastShown: false,
     lastLeft: null,
@@ -281,8 +290,8 @@ export default {
     },
     onPointerDown(event) {
       dualPane.keyboardCursor = false;
-      // The function-key bar acts on whichever pane is active, so using it doesn't switch panes
-      if (!this.shown || event.target?.closest?.(".dual-pane-keybar")) return;
+      if (!this.shown) return;
+      // The bottom bar is under both panes, so using its keys or slider doesn't switch panes
       const side = paneSideOfElement(event.target);
       if (side) setActivePane(side);
     },

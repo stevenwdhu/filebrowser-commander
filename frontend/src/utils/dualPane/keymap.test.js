@@ -131,6 +131,24 @@ describe("resolveDualPaneKey", () => {
     expect(key({ key: "ArrowDown", repeat: true })).toEqual({ cmd: "cursor", args: { step: 1, extend: false, rows: true } });
   });
 
+  it("leaves the bottom bar's slider and keys their own keys, but not the Commander keys", () => {
+    const bar = '<div id="status-bar"><div class="status-content"><button>F5</button><input type="range"></div></div>';
+    const slider = element(bar, "input");
+    const button = element(bar, "button");
+    expect(key({ key: "F5" }, {}, slider)).toEqual({ cmd: "copyToOther" });
+    expect(key({ key: "F8" }, { active: "left" }, button)).toEqual({ cmd: "deleteInActive" });
+    expect(key({ key: "\\", code: "Backslash", ctrlKey: true }, {}, slider)).toEqual({ cmd: "toggleDual" });
+    // Neither pane's: not the right pane's, nor through to the left listing
+    for (const target of [slider, button]) {
+      for (const pressed of ["ArrowRight", "ArrowDown", "Home", "Enter", "Backspace", "Delete", "a"]) {
+        expect(key({ key: pressed }, {}, target)).toBeNull();
+        expect(key({ key: pressed }, { active: "left", leftParent: { onParent: true } }, target)).toBeNull();
+      }
+    }
+    // Text fields still take every key
+    expect(key({ key: "F5" }, {}, element('<div id="status-bar"><input type="text"></div>', "input"))).toEqual({ cmd: "noop" });
+  });
+
   it("copies and moves to the other pane with F5 and F6 from either pane", () => {
     expect(key({ key: "F5" }, { active: "left" })).toEqual({ cmd: "copyToOther" });
     expect(key({ key: "F6" })).toEqual({ cmd: "moveToOther" });

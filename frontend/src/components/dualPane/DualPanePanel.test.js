@@ -115,10 +115,10 @@ describe("DualPanePanel", () => {
     root?.remove();
   });
 
-  it("lists the folder and sums it up in the footer", async () => {
+  it("lists the folder and sums it up in its status line", async () => {
     await mount();
     expect([...root.querySelectorAll(".listing-item")].map((el) => el.dataset.name)).toEqual(["..", "pics", "a.txt", "b.txt"]);
-    expect(root.querySelector(".dual-pane-footer-summary").textContent).toBe("1 general.folder | 2 general.files (7.0 bytes)");
+    expect(root.querySelector(".dual-pane-status-text").textContent).toBe("1 general.folder | 2 general.files (7.0 bytes)");
   });
 
   it("selects with clicks, makes the pane active and keeps the click from the left listing", async () => {
@@ -132,7 +132,7 @@ describe("DualPanePanel", () => {
     expect(selectedNames()).toEqual(["a.txt", "b.txt"]);
     expect(dualPane.active).toBe("right");
     expect(windowClick).not.toHaveBeenCalled();
-    expect(root.querySelector(".dual-pane-footer-summary").textContent).toBe("2 general.selectionMultiple (3.0 bytes)");
+    expect(root.querySelector(".dual-pane-status-text").textContent).toBe("2 general.selectionMultiple (3.0 bytes)");
     window.removeEventListener("click", windowClick);
   });
 
@@ -168,47 +168,36 @@ describe("DualPanePanel", () => {
     row("..").dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     await nextTick();
     expect(labels()[0]).toBe("create_new_folderfiles.newFolder");
+
+    // None on its status line, as on the left pane's
+    dualPane.menu = null;
+    await nextTick();
+    const onStatus = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+    root.querySelector(".dual-pane-status-text").dispatchEvent(onStatus);
+    await nextTick();
+    expect(onStatus.defaultPrevented).toBe(true);
+    expect(dualPane.menu).toBeNull();
   });
 
-  it("has function keys that act on the active pane", async () => {
-    state.req = {
-      source: "tank",
-      path: "/left/",
-      name: "left",
-      type: "directory",
-      items: [{ name: "x.txt", path: "/left/x.txt", type: "text/plain", size: 5 }],
-    };
-    state.selected = [0];
-    await mount();
-    const keys = [...root.querySelectorAll(".dual-pane-keybar-button")];
-    expect(keys.map((button) => button.querySelector("kbd").textContent)).toEqual(["F5", "F6", "F7", "F8"]);
-    keys[0].click(); // left is active: copy its selection into the right pane's folder
-    expect(mutations.showPrompt).toHaveBeenLastCalledWith({
-      name: "copy",
-      props: {
-        operation: "copy",
-        items: [{ path: "/left/x.txt", source: "tank", name: "x.txt", type: "text/plain", size: 5 }],
-        destination: { source: "tank", path: "/docs/" },
-      },
-    });
-    keys[2].click();
-    expect(mutations.showPrompt).toHaveBeenLastCalledWith({ name: "newDir", props: { base: { source: "tank", path: "/left/" }, redirect: false } });
-    setActivePane("right");
-    keys[2].click();
-    expect(mutations.showPrompt).toHaveBeenLastCalledWith({ name: "newDir", props: { base: { source: "tank", path: "/docs/" }, redirect: false } });
-
-    // With that prompt open, Enter on the focused button belongs to the prompt and the bar does nothing
-    state.prompts.push({ name: "newDir" });
-    const windowKeydown = vi.fn();
-    window.addEventListener("keydown", windowKeydown);
-    keys[2].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    expect(windowKeydown).toHaveBeenCalledOnce();
-    window.removeEventListener("keydown", windowKeydown);
-    const calls = mutations.showPrompt.mock.calls.length;
-    keys[3].click();
-    expect(mutations.showPrompt.mock.calls.length).toBe(calls);
-    state.prompts.pop();
-    state.selected = [];
+  it("opens its menu on a long press, except on its status line", async () => {
+    dualPane.menu = null;
+    vi.useFakeTimers();
+    try {
+      await mount();
+      const press = (target) => {
+        const event = new Event("touchstart", { bubbles: true });
+        Object.defineProperty(event, "touches", { value: [{ clientX: 5, clientY: 6 }] });
+        target.dispatchEvent(event);
+        vi.advanceTimersByTime(600);
+      };
+      press(root.querySelector(".dual-pane-status-text"));
+      expect(dualPane.menu).toBeNull();
+      press(row("b.txt"));
+      expect(dualPane.menu).toEqual({ x: 5, y: 6, onEntry: true });
+    } finally {
+      vi.useRealTimers();
+      dualPane.menu = null;
+    }
   });
 
   it("shows when a folder can't be read", async () => {

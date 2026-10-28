@@ -201,7 +201,7 @@ import Item from "@/components/files/ListingItem.vue";
 import Upload from "@/components/prompts/Upload.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import LeftParentRow from "@/components/dualPane/LeftParentRow.vue";
-import { listingColumnsWidth } from "@/store/dualPane.js";
+import { listingBottomBar, listingColumnsWidth } from "@/store/dualPane.js";
 import {
   isTypeAheadSessionActive,
   processTypeAheadKey,
@@ -1273,7 +1273,7 @@ export default {
       let startY = event.clientY - listingRect.top;
 
       // Clamp to container bounds
-      const statusBar = document.getElementById('status-bar');
+      const statusBar = listingBottomBar();
       const statusBarVisible = statusBar && getComputedStyle(statusBar).display !== 'none';
       const maxX = listingRect.width;
       const maxY = statusBarVisible
@@ -1313,7 +1313,7 @@ export default {
       let endY = event.clientY - listingRect.top;
 
       // Clamp to container bounds
-      const statusBar = document.getElementById('status-bar');
+      const statusBar = listingBottomBar();
       const statusBarVisible = statusBar && getComputedStyle(statusBar).display !== 'none';
       const maxX = listingRect.width;
       const maxY = statusBarVisible
