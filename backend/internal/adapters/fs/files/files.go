@@ -764,10 +764,15 @@ func validateMoveDestination(src, dst string, isSrcDir bool) error {
 }
 
 func MoveResource(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string) error {
-	return moveResourceImpl(isSrcDir, sourceIndex, destIndex, realsrc, realdst, svc())
+	return moveResourceImpl(isSrcDir, sourceIndex, destIndex, realsrc, realdst, svc(), nil)
 }
 
-func moveResourceImpl(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string, s *Service) error {
+// MoveResourceWithProgress is MoveResource, telling progress about a copy across volumes when not nil.
+func MoveResourceWithProgress(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string, progress *fileutils.CopyProgress) error {
+	return moveResourceImpl(isSrcDir, sourceIndex, destIndex, realsrc, realdst, svc(), progress)
+}
+
+func moveResourceImpl(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string, s *Service, progress *fileutils.CopyProgress) error {
 	// Check if source and destination are the same file
 	if realsrc == realdst {
 		return fmt.Errorf("cannot move a file to itself: %s", realsrc)
@@ -793,7 +798,7 @@ func moveResourceImpl(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst st
 	srcParentPath := filepath.Dir(realsrc)
 
 	// Perform the physical move
-	err := fileutils.MoveFile(realsrc, realdst)
+	err := fileutils.MoveFileWithProgress(realsrc, realdst, progress)
 	if err != nil {
 		return err
 	}
@@ -852,6 +857,11 @@ func moveResourceImpl(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst st
 }
 
 func CopyResource(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string) error {
+	return CopyResourceWithProgress(isSrcDir, sourceIndex, destIndex, realsrc, realdst, nil)
+}
+
+// CopyResourceWithProgress is CopyResource, telling progress what it copies when not nil.
+func CopyResourceWithProgress(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string, progress *fileutils.CopyProgress) error {
 	// Check if source and destination are the same file
 	if realsrc == realdst {
 		return fmt.Errorf("cannot copy a file to itself: %s", realsrc)
@@ -864,7 +874,7 @@ func CopyResource(isSrcDir bool, sourceIndex, destIndex, realsrc, realdst string
 	}
 
 	// Perform the physical copy
-	err := fileutils.CopyFile(realsrc, realdst)
+	err := fileutils.CopyFileWithProgress(realsrc, realdst, progress)
 	if err != nil {
 		logger.Errorf("[COPY] Physical copy failed: %v", err)
 		return err

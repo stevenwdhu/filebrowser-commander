@@ -115,7 +115,8 @@ import MoveCopyQuickDestinations from "@/components/prompts/MoveCopyQuickDestina
 import MoveCopySummary from "@/components/prompts/MoveCopySummary.vue";
 import { eventBus } from '@/store/eventBus';
 import { normalizeDirPath, recordRecentDestination } from "@/utils/moveCopyDestinations";
-import { blockReasonMessage, moveCopyBlockReason, runInBatches } from "@/utils/moveCopyPlan";
+import { blockReasonMessage, isDirectoryItem, moveCopyBlockReason, newProgressId, runInBatches, watchProgress } from "@/utils/moveCopyPlan";
+import { createTransferTiming } from "@/utils/transferTiming.js";
 import { otherPaneDestination } from "@/store/dualPane.js";
 
 export default {
@@ -394,15 +395,57 @@ export default {
           };
         });
         // Define the action function
-        // Items go in batches so the prompt can show progress; the results are merged
         const action = async (overwrite, rename) => {
           buttons.loading(this.operation);
-          const runBatch = (batch) => (getters.isShare()
-            ? resourcesApi.moveCopyPublic(state.shareInfo.hash, batch, this.operation, overwrite, rename)
-            : resourcesApi.moveCopy(batch, this.operation, overwrite, rename));
-          return runInBatches(itemsToProcess, runBatch, (progress) => {
-            this.progress = progress;
-          });
+          // Elapsed time, speed and time left. A folder listed at 4 KiB or less is one the listing
+          // hasn't measured, so its size counts as unknown.
+          const timing = createTransferTiming(
+            itemsToProcess.map((item) => ({
+              size: isDirectoryItem(item) && !(item.size > 4096) ? null : item.size ?? null,
+            })),
+            Date.now(),
+          );
+          let latest = null;
+          const showProgress = (progress) => {
+            latest = progress;
+            this.progress = { ...progress, ...timing.update(progress, Date.now()) };
+          };
+          // The figures move on between updates too: the clock ticks, and a stall slows the speed
+          const ticker = setInterval(() => {
+            if (latest) showProgress(latest);
+          }, 1000);
+          try {
+            // Items go in batches so the bar can count them; the results are merged
+            if (getters.isShare()) {
+              const runBatch = (batch) => resourcesApi.moveCopyPublic(state.shareInfo.hash, batch, this.operation, overwrite, rename);
+              return await runInBatches(itemsToProcess, runBatch, showProgress);
+            }
+            // With the event stream, the server also reports the bytes it writes. Each batch has its
+            // own id: a late report from the one before still counts its bytes, but moves nothing else.
+            const operationId = state.realtimeActive ? newProgressId() : null;
+            let batchId = null;
+            let batchStart = 0;
+            const stopWatching = operationId
+              ? watchProgress((report) => {
+                if (!report.id.startsWith(`${operationId}-`)) return;
+                timing.copied(report.id, report.bytes);
+                if (report.id !== batchId) return;
+                showProgress({ ...report, done: batchStart + report.done, total: itemsToProcess.length });
+              })
+              : () => {};
+            const runBatch = (batch, start) => {
+              batchStart = start;
+              batchId = operationId ? `${operationId}-${start}` : null;
+              return resourcesApi.moveCopy(batch, this.operation, overwrite, rename, batchId ?? undefined);
+            };
+            try {
+              return await runInBatches(itemsToProcess, runBatch, showProgress);
+            } finally {
+              stopWatching();
+            }
+          } finally {
+            clearInterval(ticker);
+          }
         };
         let conflict = false;
         let dstResp = null;

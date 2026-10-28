@@ -8653,6 +8653,10 @@ const docTemplate = `{
                     "description": "Overwrite if destination exists",
                     "type": "boolean"
                 },
+                "progressId": {
+                    "description": "ProgressID asks for \"moveCopyProgress\" events with this id on /api/events while a copy or move runs",
+                    "type": "string"
+                },
                 "rename": {
                     "description": "Auto-rename if destination exists",
                     "type": "boolean"

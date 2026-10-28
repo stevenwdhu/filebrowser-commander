@@ -2,9 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import {
   batchItems,
   blockReasonMessage,
+  MOVE_COPY_PROGRESS_EVENT,
   moveCopyBlockReason,
+  newProgressId,
   runInBatches,
   summarizeItems,
+  watchProgress,
 } from "./moveCopyPlan.js";
 
 const dir = (from, source = "tank") => ({ from, fromSource: source, name: from.split("/").filter(Boolean).pop() });
@@ -119,5 +122,34 @@ describe("runInBatches", () => {
   it("rethrows an unexpected error when nothing has succeeded", async () => {
     const error = new Error("offline");
     await expect(runInBatches(items, async () => { throw error; })).rejects.toBe(error);
+  });
+
+  it("tells each batch where it starts", async () => {
+    const many = Array.from({ length: 120 }, (_, i) => file(`/f${i}`));
+    const runBatch = vi.fn(async (batch) => ({ succeeded: batch, failed: [] }));
+    await runInBatches(many, runBatch);
+    const starts = runBatch.mock.calls.map(([, start]) => start);
+    expect(starts.slice(0, 3)).toEqual([0, 3, 6]);
+    expect(runBatch.mock.calls.every(([batch, start]) => batch[0] === many[start])).toBe(true);
+  });
+});
+
+describe("server progress", () => {
+  const send = (detail) => window.dispatchEvent(new CustomEvent(MOVE_COPY_PROGRESS_EVENT, { detail }));
+
+  it("passes on each report, until told to stop", () => {
+    const id = newProgressId();
+    expect(newProgressId()).not.toBe(id);
+    const seen = [];
+    const stop = watchProgress((progress) => seen.push(progress));
+    send({ items: 0, totalItems: 1 });
+    send({ id, items: 1, totalItems: 3, current: "b.bin", copied: 400, size: 1000 });
+    send({ id, items: 3, totalItems: 3, current: "", copied: 0, size: 0 });
+    stop();
+    send({ id, items: 3, totalItems: 3, current: "", copied: 0, size: 0 });
+    expect(seen).toEqual([
+      { id, done: 1, total: 3, current: "b.bin", copied: 400, size: 1000 },
+      { id, done: 3, total: 3, current: null, copied: 0, size: 0 },
+    ]);
   });
 });

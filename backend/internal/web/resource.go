@@ -364,6 +364,8 @@ type MoveCopyRequest struct {
 	Action    string         `json:"action"`    // "copy", "move", or "rename"
 	Overwrite bool           `json:"overwrite"` // Overwrite if destination exists
 	Rename    bool           `json:"rename"`    // Auto-rename if destination exists
+	// ProgressID asks for "moveCopyProgress" events with this id on /api/events while a copy or move runs
+	ProgressID string `json:"progressId,omitempty"`
 }
 
 // MoveCopyResponse represents the response from a move/copy operation
@@ -1356,8 +1358,11 @@ func ResourcePatchHandler(w http.ResponseWriter, r *http.Request, d *Context) (i
 		Failed:    make([]MoveCopyItem, 0),
 	}
 
+	progress := newMoveCopyProgress(d, req)
+
 	// Process each item
 	for _, item := range req.Items {
+		progress.next(path.Base(item.FromPath))
 		clientFromPath := item.FromPath
 		clientToPath := item.ToPath
 
@@ -1618,6 +1623,7 @@ func ResourcePatchHandler(w http.ResponseWriter, r *http.Request, d *Context) (i
 			dst:      realDest,
 			d:        d,
 			isSrcDir: isSrcDir,
+			progress: progress.copyProgress(),
 		})
 		if err != nil {
 			releaseCopyMoveQuota(patchSessionID)
@@ -1645,6 +1651,7 @@ func ResourcePatchHandler(w http.ResponseWriter, r *http.Request, d *Context) (i
 		response.Succeeded = append(response.Succeeded, moveCopyWithClientPaths(item, clientFromPath, clientToPath))
 		activity.RecordPatchItem(r, toActor(d), req.Action, activity.MoveCopyItem{FromSource: item.FromSource, FromPath: clientFromPath, ToPath: clientToPath})
 	}
+	progress.finish()
 
 	if len(response.Failed) == 0 && len(response.Succeeded) == 0 {
 		response.Failed = append(response.Failed, MoveCopyItem{
@@ -1774,12 +1781,13 @@ type patchActionParams struct {
 	dst      string
 	d        *Context
 	isSrcDir bool
+	progress *fileutils.CopyProgress // follows the copy, when not nil
 }
 
 func patchAction(ctx context.Context, params patchActionParams) error {
 	switch params.action {
 	case "copy":
-		err := files.CopyResource(params.isSrcDir, params.srcIndex, params.dstIndex, params.src, params.dst)
+		err := files.CopyResourceWithProgress(params.isSrcDir, params.srcIndex, params.dstIndex, params.src, params.dst, params.progress)
 		return err
 	case "rename", "move":
 		idx := indexing.GetIndex(params.srcIndex)
@@ -1806,7 +1814,7 @@ func patchAction(ctx context.Context, params patchActionParams) error {
 
 		// delete thumbnails
 		preview.DelThumbs(ctx, *fileInfo)
-		err = files.MoveResource(params.isSrcDir, params.srcIndex, params.dstIndex, params.src, params.dst)
+		err = files.MoveResourceWithProgress(params.isSrcDir, params.srcIndex, params.dstIndex, params.src, params.dst, params.progress)
 		if err != nil {
 			return err
 		}

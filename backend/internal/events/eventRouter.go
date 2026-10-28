@@ -106,6 +106,18 @@ func SendToUsers(eventType, message string, users []string) {
 	}
 }
 
+// TrySendToUsers is SendToUsers for frequent updates that a later one replaces: when the queue
+// is full the event is dropped rather than waiting.
+func TrySendToUsers(eventType, message string, users []string) {
+	select {
+	case userEventChan <- userEvent{
+		event: EventMessage{EventType: eventType, Message: message},
+		users: users,
+	}:
+	default:
+	}
+}
+
 func SendSourceUpdate(source string, message string) {
 	event := sourceEvent{
 		source: source,

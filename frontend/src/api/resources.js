@@ -952,7 +952,8 @@ export async function moveCopy(
   items,
   action = 'copy',
   overwrite = false,
-  rename = false
+  rename = false,
+  progressId = undefined
 ) {
   if (!items || !Array.isArray(items) || items.length === 0) {
     throw new Error('items array is required and must not be empty')
@@ -969,7 +970,9 @@ export async function moveCopy(
       })),
       action: action,
       overwrite: overwrite,
-      rename: rename
+      rename: rename,
+      // Asks for moveCopyProgress events with this id while the server copies (notify/events.js)
+      ...(progressId ? { progressId } : {})
     }
 
     const apiPath = getApiPath('resources')

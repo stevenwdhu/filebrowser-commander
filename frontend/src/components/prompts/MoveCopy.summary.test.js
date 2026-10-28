@@ -57,6 +57,7 @@ vi.mock("@/components/files/FileList.vue", () => ({
   },
 }));
 import { dualPane } from "@/store/dualPane.js";
+import { MOVE_COPY_PROGRESS_EVENT } from "@/utils/moveCopyPlan.js";
 import MoveCopy from "./MoveCopy.vue";
 
 let app, root;
@@ -73,6 +74,8 @@ const text = (testId) => {
   return element && [...element.children].map((child) => child.textContent.trim()).filter(Boolean).join(" ");
 };
 // Source and path on the destination row
+const status = () => root.querySelector(".move-copy-progress-status")?.textContent;
+const timing = () => text("move-copy-timing");
 const destination = () => {
   const row = root.querySelector('[data-testid="move-copy-destination"]');
   if (!row) return null;
@@ -95,6 +98,7 @@ describe("MoveCopy summary", () => {
     state.selected = [];
     state.sources.info = { tank: {}, backup: {} };
     state.user.singleClick = false;
+    state.realtimeActive = false;
     api.fetchFiles.mockResolvedValue({ items: [] });
   });
   afterEach(() => {
@@ -305,18 +309,93 @@ describe("MoveCopy summary", () => {
     await nextTick();
     const bar = root.querySelector('[role="progressbar"]');
     expect(bar.getAttribute("aria-valuenow")).toBe("0");
-    expect(bar.getAttribute("aria-valuemax")).toBe("2");
+    expect(bar.getAttribute("aria-valuemax")).toBe("100");
     expect(root.querySelector(".move-copy-progress-current").textContent).toBe("a");
 
     pending[0]({ succeeded: [{}], failed: [] });
     await vi.waitFor(() => expect(pending).toHaveLength(2));
     await nextTick();
-    expect(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow")).toBe("1");
+    expect(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow")).toBe("50");
 
     pending[1]({ succeeded: [{}], failed: [] });
     await vi.waitFor(() => expect(vm.isLoading).toBe(false));
     expect(api.moveCopy.mock.calls.map(([batch]) => batch.map((item) => item.to))).toEqual([["/archive/a"], ["/archive/b"]]);
     expect(root.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  it("with the event stream, shows the bytes of the item each batch is on", async () => {
+    state.realtimeActive = true;
+    const pending = [];
+    api.moveCopy.mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+    const vm = mount("copy", [folder("/a/"), folder("/b/")]);
+    vm.destSource = "backup";
+    vm.destPath = "/archive/";
+    await nextTick();
+    actionButton("copy").click();
+    await vi.waitFor(() => expect(pending).toHaveLength(1));
+    const firstId = api.moveCopy.mock.calls[0][4];
+    expect(firstId).toMatch(/-0$/);
+    const report = (detail) => window.dispatchEvent(new CustomEvent(MOVE_COPY_PROGRESS_EVENT, { detail }));
+    const bar = () => root.querySelector('[role="progressbar"]');
+    const MB = 1024 * 1024;
+
+    report({ id: "someone else's", items: 0, totalItems: 1, current: "x", copied: 1, size: 2 });
+    report({ id: firstId, items: 0, totalItems: 1, current: "a", copied: 3 * MB, size: 4 * MB });
+    await nextTick();
+    // Half the items, three quarters into the first: 37%
+    expect(bar().getAttribute("aria-valuenow")).toBe("37");
+    expect(root.querySelector(".move-copy-progress-fill").style.width).toBe("37%");
+    expect(root.querySelector(".move-copy-progress-current").textContent).toBe("a");
+    const bytes = 'prompts.moveCopyBytesProgress {"done":"3.0 MB","total":"4.0 MB"}';
+    expect(root.querySelector(".move-copy-progress-bytes").textContent).toBe(bytes);
+    expect(bar().getAttribute("aria-label")).toBe(`prompts.moveCopyProgress {"done":0,"total":2}, a, ${bytes}`);
+
+    pending[0]({ succeeded: [{}], failed: [] });
+    await vi.waitFor(() => expect(pending).toHaveLength(2));
+    const secondId = api.moveCopy.mock.calls[1][4];
+    expect(secondId).toBe(firstId.replace(/-0$/, "-1"));
+    // A late report from the first batch moves nothing on screen
+    report({ id: firstId, items: 1, totalItems: 1, current: "", copied: 0, size: 0 });
+    await nextTick();
+    expect(bar().getAttribute("aria-valuenow")).toBe("50");
+    expect(root.querySelector(".move-copy-progress-status").textContent).toContain('prompts.moveCopyProgress {"done":1,"total":2}');
+    report({ id: secondId, items: 0, totalItems: 1, current: "b", copied: 4 * MB, size: 4 * MB });
+    await nextTick();
+    // Every byte of the last item is copied, but it isn't through yet
+    expect(bar().getAttribute("aria-valuenow")).toBe("99");
+    expect(root.querySelector(".move-copy-progress-current").textContent).toBe("b");
+
+    pending[1]({ succeeded: [{}], failed: [] });
+    await vi.waitFor(() => expect(vm.isLoading).toBe(false));
+    expect(root.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  it("shows the bytes of a single item without counting items", async () => {
+    state.realtimeActive = true;
+    api.moveCopy.mockImplementation(() => new Promise(() => {}));
+    const vm = mount("copy", [folder("/big/")]);
+    vm.destSource = "backup";
+    await nextTick();
+    actionButton("copy").click();
+    await vi.waitFor(() => expect(api.moveCopy).toHaveBeenCalledTimes(1));
+    const id = api.moveCopy.mock.calls[0][4];
+    window.dispatchEvent(new CustomEvent(MOVE_COPY_PROGRESS_EVENT, {
+      detail: { id, items: 0, totalItems: 1, current: "big", copied: 1, size: 4 },
+    }));
+    await nextTick();
+    expect(root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow")).toBe("25");
+    expect(status()).toBe('bigprompts.moveCopyBytesProgress {"done":"1.0 bytes","total":"4.0 bytes"}');
+    expect(timing()).toMatch(/^prompts.moveCopyElapsed \{"time":"0:00"\}\s*prompts.moveCopyEstimating$/);
+  });
+
+  it("without the event stream, asks for no progress reports", async () => {
+    api.moveCopy.mockResolvedValue({ succeeded: [{}], failed: [] });
+    const vm = mount("copy", [folder("/a/")]);
+    vm.destSource = "backup";
+    await nextTick();
+    actionButton("copy").click();
+    await vi.waitFor(() => expect(api.moveCopy).toHaveBeenCalledTimes(1));
+    expect(api.moveCopy.mock.calls[0][4]).toBeUndefined();
   });
 
   it("shows an indeterminate bar for a single item", async () => {
@@ -327,6 +406,88 @@ describe("MoveCopy summary", () => {
     actionButton("copy").click();
     await vi.waitFor(() => expect(root.querySelector('[role="progressbar"]')).not.toBeNull());
     expect(root.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow")).toBe(false);
-    expect(text("move-copy-progress")).toBe("prompts.operationInProgress");
+    expect(status()).toBe("prompts.operationInProgress");
+    // Without byte reports there's nothing to estimate from: elapsed time only
+    expect(timing()).toBe('prompts.moveCopyElapsed {"time":"0:00"}');
+  });
+
+  it("stops the clock once the operation is over", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
+    try {
+      let finish;
+      api.moveCopy.mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+      const vm = mount("copy", [folder("/a/")]);
+      vm.destSource = "backup";
+      await nextTick();
+      actionButton("copy").click();
+      await vi.waitFor(() => expect(api.moveCopy).toHaveBeenCalledTimes(1));
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
+      finish({ succeeded: [{}], failed: [] });
+      await vi.waitFor(() => expect(vm.isLoading).toBe(false));
+      vi.advanceTimersByTime(3000);
+      await nextTick();
+      expect(vm.progress).toBeNull();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("shows elapsed time, speed and time left, with the bar weighted by size", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
+    vi.setSystemTime(0);
+    try {
+      state.realtimeActive = true;
+      const pending = [];
+      api.moveCopy.mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+      const GB = 1024 ** 3;
+      // 1 GB, then 3 GB: one request each
+      const vm = mount("copy", [{ ...folder("/small/"), size: GB }, { ...folder("/big/"), size: 3 * GB }]);
+      vm.destSource = "backup";
+      await nextTick();
+      actionButton("copy").click();
+      await vi.waitFor(() => expect(pending).toHaveLength(1));
+      const startedAt = vm.progress.startedAt;
+      const id = api.moveCopy.mock.calls[0][4];
+      const reportAt = async (at, detail) => {
+        vi.setSystemTime(startedAt + at);
+        // One file in this request: everything it wrote is the file's
+        window.dispatchEvent(new CustomEvent(MOVE_COPY_PROGRESS_EVENT, {
+          detail: { id, totalItems: 1, items: 0, bytes: detail.copied, ...detail },
+        }));
+        await nextTick();
+      };
+      const bar = () => root.querySelector('[role="progressbar"]').getAttribute("aria-valuenow");
+      const left = () => root.querySelector(".move-copy-progress-left")?.textContent;
+
+      await reportAt(1000, { current: "small", copied: GB / 2, size: GB });
+      // Half of the first GB is an eighth of the whole
+      expect(bar()).toBe("12");
+      expect(left()).toBe("prompts.moveCopyEstimating");
+      expect(root.querySelector(".move-copy-progress-speed")).toBeNull();
+
+      await reportAt(3000, { current: "small", copied: GB, size: GB });
+      // Half a GB in the 2 s since the first report, and 3 GB to go at that pace: 12 s, shown as 15
+      expect(bar()).toBe("25");
+      expect(vm.progress.bytesPerSecond).toBeCloseTo(GB / 4, -6);
+      expect(root.querySelector(".move-copy-progress-speed").textContent).toMatch(/^[\d.]+ MB\/s$/);
+      expect(left()).toBe('prompts.moveCopyTimeLeft {"time":"15 seconds"}');
+      // Another operation's bytes don't count
+      window.dispatchEvent(new CustomEvent(MOVE_COPY_PROGRESS_EVENT, {
+        detail: { id: "another-0", totalItems: 1, items: 0, copied: 0, size: 0, bytes: 100 * GB },
+      }));
+      vi.advanceTimersByTime(1000);
+      await nextTick();
+      expect(vm.progress.bytesPerSecond).toBeLessThan(GB);
+
+      // The elapsed time ticks on its own between reports, and a stall turns into estimating again
+      vi.advanceTimersByTime(62000);
+      await nextTick();
+      expect(timing()).toMatch(/^prompts.moveCopyElapsed \{"time":"1:0\d"\}/);
+      expect(left()).toBe("prompts.moveCopyEstimating");
+      expect(root.querySelector(".move-copy-progress-speed")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

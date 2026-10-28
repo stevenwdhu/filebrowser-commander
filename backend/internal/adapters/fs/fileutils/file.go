@@ -75,11 +75,16 @@ func removeDestinationSymlinkIfPresent(dest string) error {
 // By default, the rename system call is used. If src and dst are on different volumes,
 // CopyFile is used as a fallback and the source is removed synchronously on success.
 func MoveFile(src, dst string) error {
+	return MoveFileWithProgress(src, dst, nil)
+}
+
+// MoveFileWithProgress is MoveFile, telling progress about a cross-volume fallback copy when not nil.
+func MoveFileWithProgress(src, dst string, progress *CopyProgress) error {
 	if err := os.Rename(src, dst); err != nil {
 		if !isCrossDeviceRenameError(err) {
 			return err
 		}
-		if err := CopyFile(src, dst); err != nil {
+		if err := CopyFileWithProgress(src, dst, progress); err != nil {
 			return err
 		}
 		return os.RemoveAll(src)
@@ -91,19 +96,42 @@ func preserveFileMode(path string, mode os.FileMode) error {
 	return os.Chmod(path, mode.Perm())
 }
 
+// CopyProgress follows a copy while it runs. Either function may be nil.
+type CopyProgress struct {
+	// Start is told what is about to be copied, a file or a whole folder, before any data is
+	Start func(source string)
+	// Wrote is told how many bytes were just written
+	Wrote func(written int64)
+}
+
+func (p *CopyProgress) wrote() func(int64) {
+	if p == nil {
+		return nil
+	}
+	return p.Wrote
+}
+
 // CopyFile copies a file or directory from source to dest and returns an error if any.
 func CopyFile(source, dest string) error {
+	return CopyFileWithProgress(source, dest, nil)
+}
+
+// CopyFileWithProgress is CopyFile, telling progress what it copies when not nil.
+func CopyFileWithProgress(source, dest string, progress *CopyProgress) error {
 	info, err := os.Lstat(source)
 	if err != nil {
 		return err
+	}
+	if progress != nil && progress.Start != nil {
+		progress.Start(source)
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
 		return copySymlink(source, dest)
 	}
 	if info.IsDir() {
-		return copyDirectory(source, dest)
+		return copyDirectory(source, dest, progress.wrote())
 	}
-	return copySingleFile(source, dest)
+	return copySingleFile(source, dest, progress.wrote())
 }
 
 func copySymlink(source, dest string) error {
@@ -129,7 +157,7 @@ func copySymlink(source, dest string) error {
 }
 
 // copySingleFile handles copying a single file.
-func copySingleFile(source, dest string) error {
+func copySingleFile(source, dest string, wrote func(int64)) error {
 	// Get source file info to preserve permissions
 	srcInfo, err := os.Stat(source)
 	if err != nil {
@@ -162,7 +190,12 @@ func copySingleFile(source, dest string) error {
 	defer dst.Close()
 
 	// Copy the contents of the file.
-	if err = copyFileContents(dst, src); err != nil {
+	if wrote == nil {
+		err = copyFileContents(dst, src)
+	} else {
+		err = copyFileContentsWithProgress(dst, src, wrote)
+	}
+	if err != nil {
 		return err
 	}
 
@@ -193,8 +226,43 @@ func copyFileContents(dst io.Writer, src io.Reader) error {
 	return err
 }
 
+// copyChunkSize is how much is copied between progress reports; a variable so tests can shrink it.
+var copyChunkSize int64 = 16 << 20
+
+// copyFileContentsWithProgress copies in chunks and reports each one. Copying through an
+// io.LimitedReader keeps io.Copy's fast paths for every chunk, such as copy_file_range on Linux,
+// which ZFS can turn into block cloning.
+func copyFileContentsWithProgress(dst io.Writer, src io.Reader, wrote func(int64)) error {
+	buffered := false
+	for {
+		w, r := dst, src
+		if buffered {
+			w, r = struct{ io.Writer }{dst}, struct{ io.Reader }{src}
+		}
+		chunk := &io.LimitedReader{R: r, N: copyChunkSize}
+		_, err := io.Copy(w, chunk)
+		// What the chunk lost is what was copied. io.Copy's count can be short: when copy_file_range
+		// fails partway, os.File.ReadFrom finishes with buffered I/O and returns only that part.
+		if n := copyChunkSize - chunk.N; n > 0 {
+			wrote(n)
+		}
+		switch {
+		case err == nil:
+			if chunk.N > 0 {
+				// The source ended inside this chunk
+				return nil
+			}
+		case !buffered && errors.Is(err, syscall.EBADF):
+			// As in copyFileContents: carry on from the current offsets with buffered I/O
+			buffered = true
+		default:
+			return err
+		}
+	}
+}
+
 // copyDirectory handles copying directories recursively.
-func copyDirectory(source, dest string) error {
+func copyDirectory(source, dest string, wrote func(int64)) error {
 	srcInfo, err := os.Lstat(source)
 	if err != nil {
 		return err
@@ -232,13 +300,13 @@ func copyDirectory(source, dest string) error {
 		}
 		if entry.IsDir() {
 			// Recursively copy subdirectories.
-			err = copyDirectory(srcPath, destPath)
+			err = copyDirectory(srcPath, destPath, wrote)
 			if err != nil {
 				return err
 			}
 		} else {
 			// Copy files.
-			err = copySingleFile(srcPath, destPath)
+			err = copySingleFile(srcPath, destPath, wrote)
 			if err != nil {
 				return err
 			}

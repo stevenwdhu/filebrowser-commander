@@ -3,6 +3,7 @@ import i18n from "@/i18n/index.ts"
 import { notify } from "@/notify/index.ts"
 import { mutations, state } from "@/store/index.ts"
 import { globalVars } from "@/utils/constants.js"
+import { MOVE_COPY_PROGRESS_EVENT } from "@/utils/moveCopyPlan.js"
 
 let eventSrc = null
 let reconnectTimeout = null
@@ -200,6 +201,16 @@ async function eventRouter (eventType, message) {
         window.dispatchEvent(new CustomEvent('onlyOfficeLogEvent', { detail: logData }))
       } catch (error) {
         console.error('Error dispatching OnlyOffice log event:', error)
+      }
+      break
+
+    case 'moveCopyProgress':
+      // For the copy/move prompt that asked for it, which listens with watchProgress
+      try {
+        const progress = typeof message === 'string' ? JSON.parse(message) : message
+        window.dispatchEvent(new CustomEvent(MOVE_COPY_PROGRESS_EVENT, { detail: progress }))
+      } catch (error) {
+        console.error('Error dispatching move/copy progress event:', error)
       }
       break
 

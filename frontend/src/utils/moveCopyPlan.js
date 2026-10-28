@@ -5,6 +5,9 @@ import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
 /** Most requests an operation is split into; each one moves the progress bar. */
 export const MAX_PROGRESS_STEPS = 50;
 
+/** Window event that carries the server's progress for a copy or move (notify/events.js). */
+export const MOVE_COPY_PROGRESS_EVENT = "moveCopyProgressEvent";
+
 /** Items are prompt items: { from, fromSource, name, type?, size? }. Directory paths end in "/". */
 export function isDirectoryItem(item) {
   return item.type === "directory" || item.from.endsWith("/");
@@ -78,8 +81,9 @@ function mergeResult(into, result) {
 
 /**
  * Run a move/copy one batch at a time and merge the results into one { succeeded, failed }, the
- * shape a single request returns. onProgress gets { done, total, current } before each batch
- * (current is the batch's first item name) and once more when everything has run.
+ * shape a single request returns. runBatch gets each batch and the index of its first item.
+ * onProgress gets { done, total, current } before each batch (current is the batch's first item
+ * name) and once more when everything has run.
  */
 export async function runInBatches(items, runBatch, onProgress = () => {}) {
   const result = { succeeded: [], failed: [] };
@@ -88,7 +92,7 @@ export async function runInBatches(items, runBatch, onProgress = () => {}) {
   for (const batch of batchItems(items)) {
     onProgress({ done, total, current: batch[0].name });
     try {
-      mergeResult(result, await runBatch(batch));
+      mergeResult(result, await runBatch(batch, done));
     } catch (error) {
       if (error?.failed || error?.succeeded) {
         // The API attaches per-item results to a failed request
@@ -112,4 +116,34 @@ export async function runInBatches(items, runBatch, onProgress = () => {}) {
   }
   onProgress({ done, total, current: null });
   return result;
+}
+
+/** An id for one operation's progress events, so another tab's operation is never taken for it. */
+export function newProgressId() {
+  // randomUUID needs a secure context (https or localhost)
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * Follow the server's progress reports. onProgress gets { id, done, total, current, copied, size,
+ * bytes } for each request that asked for them: done and total count that request's items, copied
+ * and size are the bytes of the item it is on (size is 0 until known, and for a rename), and bytes
+ * is everything the request has written so far. Returns a function that stops listening.
+ */
+export function watchProgress(onProgress) {
+  const listener = (event) => {
+    const progress = event.detail;
+    if (!progress?.id) return;
+    onProgress({
+      id: progress.id,
+      done: progress.items,
+      total: progress.totalItems,
+      current: progress.current || null,
+      copied: progress.copied,
+      size: progress.size,
+      bytes: progress.bytes,
+    });
+  };
+  window.addEventListener(MOVE_COPY_PROGRESS_EVENT, listener);
+  return () => window.removeEventListener(MOVE_COPY_PROGRESS_EVENT, listener);
 }
