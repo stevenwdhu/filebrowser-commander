@@ -8,8 +8,7 @@ A two-pane, keyboard-driven web file manager in the style of Total Commander, bu
 > Quantum's main branch, which is its beta channel, and rebased onto it as that moves. Everything
 > else (sources, users, sharing, search, previews, the API and `config.yaml`) works as in
 > FileBrowser Quantum, and [its docs](https://filebrowserquantum.com/) cover it. This fork isn't
-> affiliated with that project, so please report problems with it in this repository's issues,
-> not upstream's.
+> affiliated with that project, so please don't report its problems upstream.
 
 ## Why
 
