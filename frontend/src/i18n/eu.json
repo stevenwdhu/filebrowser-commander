@@ -539,7 +539,7 @@
     "errorGeneratingHash": "Akatsa hasha sortzean",
     "token": "Tokena",
     "onlyOfficeId": "OnlyOffice IDa",
-    "firstLoadTitle": "Ongi etorri FileBrowser Quantum-era!",
+    "firstLoadTitle": "Ongi etorri FileBrowser Commander-era!",
     "firstLoadBody": "Datu-base berri bat sortu da abiaraztean. Hau ez bazen espero zenuena, egiaztatu konfigurazio-fitxategiko `server.database` bidea eta ziurtatu badagoela. Docker-en, datu-basearen bidea `./data/filebrowser.sqlite` edo `./filebrowser.sqlite` izan daiteke.",
     "halloweenTitle": "Halloween zoriontsua!",
     "halloweenBody": "Halloween gaia aplikatu da. Desgai dezakezu gustatzen ez bazaizu, edo betiko desgaitu profilaren ezarpenetan beste edozein gai hautatuta.",

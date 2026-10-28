@@ -7,9 +7,11 @@
 
   [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://github.com/gtsteffaniak/filebrowser/wiki/Q&A#is-there-a-way-to-donate-or-support-this-project)
 
-  <img width="150" alt="FileBrowser Quantum logo" src="https://github.com/user-attachments/assets/c40b22c9-33da-47b7-bc4c-ce69bb5cc174">
-  <h3>FileBrowser Quantum</h3>
-  The best free self-hosted web-based file manager.
+  <img width="150" alt="FileBrowser Commander logo" src="https://github.com/user-attachments/assets/c40b22c9-33da-47b7-bc4c-ce69bb5cc174">
+  <h3>FileBrowser Commander</h3>
+  A fork of <a href="https://github.com/gtsteffaniak/filebrowser">FileBrowser Quantum</a> with a Commander-style two-pane layout (F5–F8 keys, drag and drop between the panes)
+  <br/>
+  and server-side copy and move that shows byte progress, speed and time left. The rest of this README is upstream's.
   <br/><br/>
   <img width="800" alt="FileBrowser Quantum file listing in dark mode" src="https://filebrowserquantum.com/images/generated/listing/view-mode-normal-dark.jpg">
 </div>

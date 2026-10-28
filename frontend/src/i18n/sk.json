@@ -250,7 +250,7 @@
     "errorGeneratingHash": "Chyba pri generovaní hash",
     "token": "Token",
     "onlyOfficeId": "IbaOffice ID",
-    "firstLoadTitle": "Vitajte v programe FileBrowser Quantum!",
+    "firstLoadTitle": "Vitajte v programe FileBrowser Commander!",
     "halloweenTitle": "Šťastný Halloween!",
     "halloweenBody": "Bola použitá téma Halloween. Ak sa vám nepáči, môžete ju vypnúť, alebo ju natrvalo zakázať v nastaveniach profilu výberom akejkoľvek inej témy.",
     "firstLoadBody": "Pri spustení bola vytvorená nová databáza. Ak to nie je to, čo ste očakávali, dvakrát skontrolujte konfiguračný súbor pre cestu `server.database` a uistite sa, že existuje. V dockeri môže byť cesta k databáze `./data/filebrowser.sqlite` alebo `./filebrowser.sqlite`.",

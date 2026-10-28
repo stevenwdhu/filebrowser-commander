@@ -96,7 +96,7 @@ test("no viewer available", async ({ page, theme }) => {
     return;
   }
   await page.goto("/files/playwright/file.tar.gz");
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - file.tar.gz");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - file.tar.gz");
   await sleep(500);
   await page.screenshot({ path: `./generated/viewer/no-viewer-available-${theme}.jpg`, quality: jpgQuality });
 })
@@ -186,7 +186,7 @@ test("markdown viewer", async ({ page, theme }) => {
   }
   await ensureUserDarkMode(page, true);
   await page.goto("/files/playwright/files/for testing.md");
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - for testing.md");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - for testing.md");
   await expect(page.locator("#markedown-viewer")).toContainText("this is a test");
   await expect(page.locator("html")).toHaveClass(/dark-mode/);
   await sleep(500);
@@ -199,13 +199,13 @@ test("3d file preview thumbnails", async ({ page, checkForErrors, theme }) => {
     return;
   }
   await page.goto("/files/");
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - playwright-files");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - playwright-files");
   await page.locator('a[aria-label="myfolder"]').waitFor({ state: 'visible' });
   await page.locator('a[aria-label="myfolder"]').dblclick();
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - myfolder");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - myfolder");
   await page.locator('a[aria-label="3dmodels"]').waitFor({ state: 'visible' });
   await page.locator('a[aria-label="3dmodels"]').dblclick();
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - 3dmodels");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - 3dmodels");
   await waitForListing3dThumbnails(page);
   await sleep(250);
   await page.screenshot({ path: `./generated/thumbnails/3d-model-${theme}.jpg`, quality: jpgQuality });
@@ -218,16 +218,16 @@ test("3d file preview", async ({ page, checkForErrors, theme}) => {
     return;
   }
   await page.goto("/files/");
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - playwright-files");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - playwright-files");
   await page.locator('a[aria-label="myfolder"]').waitFor({ state: 'visible' });
   await page.locator('a[aria-label="myfolder"]').dblclick();
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - myfolder");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - myfolder");
   await page.locator('a[aria-label="3dmodels"]').waitFor({ state: 'visible' });
   await page.locator('a[aria-label="3dmodels"]').dblclick();
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - 3dmodels");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - 3dmodels");
   await page.locator('a[aria-label="Lowpoly_tree_sample.dae"]').waitFor({ state: 'visible' });
   await page.locator('a[aria-label="Lowpoly_tree_sample.dae"]').dblclick();
-  await expect(page).toHaveTitle("FileBrowser Quantum - Files - Lowpoly_tree_sample.dae");
+  await expect(page).toHaveTitle("FileBrowser Commander - Files - Lowpoly_tree_sample.dae");
   // check previews work
   await page.locator('.threejs-viewer .loading-overlay').waitFor({ state: 'visible' });
   await page.locator('.threejs-viewer canvas').waitFor({ state: 'visible' })

@@ -518,7 +518,7 @@
     "errorGeneratingHash": "Errore durante la generazione dell'hash",
     "token": "Token",
     "onlyOfficeId": "ID OnlyOffice",
-    "firstLoadTitle": "Benvenuto in FileBrowser Quantum!",
+    "firstLoadTitle": "Benvenuto in FileBrowser Commander!",
     "firstLoadBody": "È stato creato un nuovo database all'avvio. Se non è quello che ti aspettavi, controlla il percorso `server.database` nel file di configurazione. Su Docker, il percorso potrebbe essere `./data/filebrowser.sqlite` o `./filebrowser.sqlite`.",
     "halloweenTitle": "Buon Halloween!",
     "halloweenBody": "Il tema di Halloween è stato applicato. Puoi disabilitarlo o cambiarlo permanentemente nelle impostazioni del profilo.",

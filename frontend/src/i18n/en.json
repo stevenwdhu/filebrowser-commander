@@ -539,7 +539,7 @@
     "errorGeneratingHash": "Error generating hash",
     "token": "Token",
     "onlyOfficeId": "OnlyOffice ID",
-    "firstLoadTitle": "Welcome to FileBrowser Quantum!",
+    "firstLoadTitle": "Welcome to FileBrowser Commander!",
     "firstLoadBody": "A new database was created on startup. If this is not what you expected, please double check your configuration file for `server.database` path and ensure it exists. On docker, database path could be `./data/filebrowser.sqlite` or `./filebrowser.sqlite`.",
     "halloweenTitle": "Happy Halloween!",
     "halloweenBody": "The Halloween theme has been applied. You can disable it if you don't like it, or permanently disable it in profile settings by selecting any other theme.",

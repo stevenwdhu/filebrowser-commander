@@ -250,7 +250,7 @@
     "errorGeneratingHash": "해시 생성 오류",
     "token": "토큰",
     "onlyOfficeId": "OnlyOffice ID",
-    "firstLoadTitle": "파일브라우저 퀀텀에 오신 것을 환영합니다!",
+    "firstLoadTitle": "FileBrowser Commander에 오신 것을 환영합니다!",
     "halloweenTitle": "해피 할로윈!",
     "halloweenBody": "할로윈 테마가 적용되었습니다. 마음에 들지 않으면 비활성화하거나 프로필 설정에서 다른 테마를 선택하여 영구적으로 비활성화할 수 있습니다.",
     "firstLoadBody": "시작 시 새 데이터베이스가 생성되었습니다. 예상한 것과 다른 경우 구성 파일에서 `server.database` 경로가 존재하는지 다시 확인하세요. 도커에서 데이터베이스 경로는 './데이터/데이터베이스.db' 또는 './데이터베이스.db'일 수 있습니다.",

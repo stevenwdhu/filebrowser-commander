@@ -27,7 +27,7 @@ import (
 
 const (
 	defaultMinSearchLength     = 3
-	defaultFrontendDescription = "FileBrowser Quantum is a file manager for the web which can be used to manage files on your server"
+	defaultFrontendDescription = "FileBrowser Commander is a file manager for the web which can be used to manage files on your server"
 )
 
 var Config Settings
@@ -921,7 +921,7 @@ func SetDefaults(generate bool) Settings {
 			},
 		},
 		Frontend: Frontend{
-			Name:        "FileBrowser Quantum",
+			Name:        "FileBrowser Commander",
 			Description: defaultFrontendDescription,
 		},
 		UserDefaults: UserDefaults{

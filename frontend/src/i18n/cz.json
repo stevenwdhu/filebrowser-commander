@@ -322,7 +322,7 @@
     "errorGeneratingHash": "Chyba při generování hash",
     "token": "Token",
     "onlyOfficeId": "OnlyOffice ID",
-    "firstLoadTitle": "Vítejte v aplikaci FileBrowser Quantum!",
+    "firstLoadTitle": "Vítejte v aplikaci FileBrowser Commander!",
     "halloweenTitle": "Šťastný Halloween!",
     "halloweenBody": "Bylo použito téma Halloween. Pokud se vám nelíbí, můžete jej vypnout nebo trvale zakázat v nastavení profilu výběrem jiného motivu.",
     "firstLoadBody": "Při spuštění byla vytvořena nová databáze. Pokud to není to, co jste očekávali, překontrolujte prosím konfigurační soubor pro cestu `server.database` a ujistěte se, že existuje. V dockeru může být cesta k databázi `./data/filebrowser.sqlite` nebo `./filebrowser.sqlite`.",
