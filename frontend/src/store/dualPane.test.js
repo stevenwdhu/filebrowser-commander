@@ -18,6 +18,7 @@ vi.mock("@/store", async () => {
 });
 vi.mock("@/api", () => ({ resourcesApi: api }));
 import {
+  cursorHidden,
   dualPane,
   initDualPane,
   openRight,
@@ -163,6 +164,18 @@ describe("dual-pane store", () => {
     expect(otherPaneDestination([{ source: "backup", path: "/x/one.txt" }])).toEqual({ source: "tank", path: "/docs/" });
     dualPane.shown = false;
     expect(otherPaneDestination([{ source: "tank", path: "/docs/a.txt" }])).toBeNull();
+  });
+
+  it("hides the cursor outline from single-click users until they use the keyboard", () => {
+    state.value.user = { singleClick: false };
+    dualPane.keyboardCursor = false;
+    expect(cursorHidden()).toBe(false);
+    state.value.user = { singleClick: true };
+    expect(cursorHidden()).toBe(true);
+    dualPane.keyboardCursor = true;
+    expect(cursorHidden()).toBe(false);
+    dualPane.keyboardCursor = false;
+    delete state.value.user;
   });
 
   it("describes each pane's folder and the items an operation would use", async () => {

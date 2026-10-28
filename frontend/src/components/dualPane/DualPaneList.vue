@@ -7,15 +7,15 @@
     tabindex="-1"
     @click="onListClick"
   >
-    <!-- Grouped like the main listing so its layout styles apply; ".." leads the folders -->
+    <!-- Grouped like the main listing so its layout styles apply; ".." comes first in a group of its own, as on the left -->
     <template v-for="(group, groupIndex) in groups" :key="group.key">
       <div v-if="group.title">
         <h2>{{ group.title }}</h2>
       </div>
       <div
-        :class="[group.key, { firstGroup: groupIndex === 0, lastGroup: groupIndex === groups.length - 1 }]"
-        role="group"
-        :aria-label="group.label"
+        :class="[group.className, { firstGroup: groupIndex === 0, lastGroup: groupIndex === groups.length - 1 }]"
+        :role="group.label ? 'group' : undefined"
+        :aria-label="group.label || undefined"
       >
         <ListingItem
           v-for="{ entry, index } in group.items"
@@ -109,21 +109,28 @@ export default {
       return paneItemStyles(this.viewMode, this.gallerySize, this.columns);
     },
     groups() {
+      const parent = [];
       const folders = [];
       const files = [];
       this.right.entries.forEach((entry, index) => {
-        (entry.type === "directory" ? folders : files).push({ entry, index });
+        if (isParentEntry(entry)) {
+          parent.push({ entry, index });
+        } else {
+          (entry.type === "directory" ? folders : files).push({ entry, index });
+        }
       });
       const groups = [];
+      // No heading, as the left pane's ".." (LeftParentRow) has none
+      if (parent.length > 0) {
+        groups.push({ key: "parent", className: "folder-items dual-pane-parent-group", items: parent, label: "", title: "" });
+      }
       if (folders.length > 0) {
         const label = this.$t("general.folders");
-        // ".." on its own gets no heading
-        const title = folders.some(({ entry }) => !isParentEntry(entry)) ? label : "";
-        groups.push({ key: "folder-items", items: folders, label, title });
+        groups.push({ key: "folders", className: "folder-items", items: folders, label, title: label });
       }
       if (files.length > 0) {
         const label = this.$t("general.files");
-        groups.push({ key: "file-items", items: files, label, title: label });
+        groups.push({ key: "files", className: "file-items", items: files, label, title: label });
       }
       return groups;
     },

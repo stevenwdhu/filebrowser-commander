@@ -12,6 +12,8 @@ import ListingHeader from "@/components/files/ListingHeader.vue?raw";
 import Icon from "@/components/files/Icon.vue?raw";
 import Scrollbar from "@/components/files/Scrollbar.vue?raw";
 import Shelf from "@/components/Shelf.vue?raw";
+import Breadcrumbs from "@/components/files/Breadcrumbs.vue?raw";
+import ContextMenu from "@/components/ContextMenu.vue?raw";
 import StatusBar from "@/components/StatusBar.vue?raw";
 import PathPicker from "@/components/prompts/PathPicker.vue?raw";
 import Help from "@/components/prompts/Help.vue?raw";
@@ -20,6 +22,7 @@ import Url from "@/utils/url.js?raw";
 
 // CSS ?raw imports come back empty under vitest
 const baseCss = readFileSync(resolve(process.cwd(), "src/css/base.css"), "utf8");
+const listingCss = readFileSync(resolve(process.cwd(), "src/css/listing.css"), "utf8");
 
 describe("upstream contract for the dual pane", () => {
   it("mounts the host after #main and the toggle before the view switch", () => {
@@ -71,6 +74,37 @@ describe("upstream contract for the dual pane", () => {
     expect(StatusBar.match(/mutations\.updateCurrentUser\(/g)).toHaveLength(1);
     // The right pane's thumbnails outlive the main listing's route
     expect(Icon).toMatch(/routePath\(\) \{\s*\/\/[^\n]*\n\s*if \(this\.listingViewMode\) return;\s*this\.cancelActivePreviews\(\);/);
+  });
+
+  it("still lets the left pane's path bar and '..' replace the breadcrumbs the way dualPane.css and LeftParentRow expect", () => {
+    // The ".." row's hook: ahead of the empty state, so it shows in empty folders too
+    expect(ListingView).toMatch(/<LeftParentRow :empty="numDirs \+ numFiles \+ numPinned === 0" \/>\s*<!-- Empty state -->\s*<template v-if="numDirs \+ numFiles \+ numPinned === 0">/);
+    expect(ListingView).toContain("'font-size-large': numDirs + numFiles + numPinned === 0");
+    // Its own group goes first; compact draws the outer border by these group classes
+    expect(ListingView).toMatch(/class="pinned-items"[\s\S]*:class="\{ lastGroup: numDirs === 0 && numFiles === 0, firstGroup: true \}"/);
+    expect(listingCss).toContain(".listing-items.compact :where(.firstGroup) .listing-item:first-child {");
+    // dualPane.css hides the breadcrumbs and replaces the padding ListingView leaves for them
+    expect(Breadcrumbs).toContain('id="breadcrumbs"');
+    expect(ListingView).toContain('class="listing-view-root no-select" :style="containerStyles"');
+    for (const padding of ["'padding-top': '4.1em'", "'padding-top': '4.29em'", "'padding-top': '7.51em'"]) {
+      expect(ListingView).toContain(padding);
+    }
+    expect(baseCss).toMatch(/#main \{[^}]*padding-top: var\(--header-height\);/);
+    expect(Shelf).toMatch(/#shelf \{[^}]*position: fixed;[^}]*padding: 0\.5em;/);
+    expect(Shelf).not.toMatch(/#shelf \{[^}]*\btop:/);
+    // Going up selects the folder it came from; the folder menu acts on the selection when there is one
+    expect(Files).toContain("const pHighlight = state.pendingHighlight;");
+    expect(ContextMenu).toMatch(/createOnly: \{\s*type: Boolean,/);
+    expect(ContextMenu).toContain("if (state.selected.length === 0) return [];");
+    // The row's own right-click handler, which LeftParentRow's capture handler stops
+    expect(ListingItem).toContain('@contextmenu="onRightClick"');
+    // The listing's own long press, which LeftParentRow's (set first, at the same delay) beats to the menu
+    expect(ListingView).toContain('this.$el.addEventListener("touchstart", this.openContextForSafari, {');
+    expect(ListingView).toMatch(/this\.openContext\(event\); \/\/ Open the custom context menu\s*\}\s*\}, 500\);/);
+    expect(ListingView).toMatch(/openContext\(event\) \{[\s\S]*?if \(getters\.currentPromptName\(\) === "ContextMenu"\) \{\s*return;/);
+    // dualPane.css moves the scrollbar thumb and its letter below the left path bar from these
+    expect(Scrollbar).toMatch(/\.thumb \{[^}]*top: 4em;/);
+    expect(Scrollbar).toMatch(/\.thumb-section-id \{\s*top: 5\.5em;/);
   });
 
   it("still sizes the layouts and picks them by size the way paneLayout.js copies", () => {

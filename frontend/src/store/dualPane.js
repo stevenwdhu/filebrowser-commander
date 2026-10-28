@@ -50,6 +50,11 @@ export const dualPane = reactive({
   shown: false, // Set by DualPaneHost while the pane is on screen
   menu: null, // { x, y, onEntry } while the right pane's menu is open
   drag: null, // { origin: "left" | "right" } while items are dragged from a pane
+  // The left listing's keyboard position is its selection, which ".." is never part of; this
+  // marks the keyboard cursor on the left pane's ".." row instead
+  leftOnParent: false,
+  // The last pane input was a key rather than a pointer (DualPaneHost), for cursorHidden
+  keyboardCursor: false,
   right: emptyRight(),
 });
 
@@ -86,6 +91,7 @@ export function initDualPane(username) {
   dualPane.ratio = prefs.ratio;
   dualPane.active = "left";
   dualPane.menu = null;
+  dualPane.leftOnParent = false;
   dualPane.right = emptyRight();
   if (prefs.right) {
     dualPane.right.source = prefs.right.source;
@@ -95,6 +101,12 @@ export function initDualPane(username) {
 
 function leftLocation() {
   return { source: state.req?.source, path: normalizeDirPath(state.req?.path) };
+}
+
+/** The folder a pane shows, as { source, path }. */
+export function paneLocation(side) {
+  if (side === "right") return { source: dualPane.right.source, path: dualPane.right.path };
+  return leftLocation();
 }
 
 /** Turn the second pane on or off; the first time it opens on the left pane's folder. */
@@ -113,6 +125,14 @@ export function setDualPaneEnabled(on) {
 
 export function toggleDualPane() {
   setDualPaneEnabled(!dualPane.enabled);
+}
+
+/**
+ * Whether the panes' cursor outline is hidden: for single-click users, until they move it with the
+ * keyboard, as a click opens what it lands on and never just puts the cursor there.
+ */
+export function cursorHidden() {
+  return Boolean(state.user?.singleClick) && !dualPane.keyboardCursor;
 }
 
 export function setActivePane(side) {
@@ -332,6 +352,6 @@ export function otherPaneDestination(items) {
 export function paneSideOfElement(element) {
   if (!element?.closest) return null;
   if (element.closest(".dual-pane-right")) return "right";
-  if (element.closest("#main, #status-bar, #shelf")) return "left";
+  if (element.closest("#main, #status-bar, #shelf, .dual-pane-left-bar")) return "left";
   return null;
 }

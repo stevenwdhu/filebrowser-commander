@@ -228,10 +228,16 @@ describe("DualPanePanel", () => {
     expect(list.classList.contains("list")).toBe(true);
     expect(list.style.getPropertyValue("--item-height")).toBe("65px");
     expect(headings()).toEqual(["general.folders", "general.files"]);
-    expect([...list.querySelectorAll(".folder-items .listing-item")].map((el) => el.dataset.name)).toEqual(["..", "pics"]);
-    expect([...list.querySelectorAll(".file-items .listing-item")].map((el) => el.dataset.name)).toEqual(["a.txt", "b.txt"]);
-    expect(list.querySelector(".folder-items").classList.contains("firstGroup")).toBe(true);
-    expect(list.querySelector(".file-items").classList.contains("lastGroup")).toBe(true);
+    // ".." in a group of its own with no heading, ahead of the folders, as the left pane shows it
+    const groups = [...list.querySelectorAll(".dual-pane-list > div:not(:has(> h2))")];
+    expect(groups.map((group) => [...group.querySelectorAll(".listing-item")].map((el) => el.dataset.name))).toEqual([[".."], ["pics"], ["a.txt", "b.txt"]]);
+    expect(groups.map((group) => group.className)).toEqual([
+      "folder-items dual-pane-parent-group firstGroup",
+      "folder-items",
+      "file-items lastGroup",
+    ]);
+    expect(groups[0].hasAttribute("role")).toBe(false);
+    expect(groups[1].getAttribute("aria-label")).toBe("general.folders");
     // Stripes as in the main listing, which has no ".."
     expect([...list.querySelectorAll(".zebra-row")].map((el) => el.dataset.name)).toEqual(["a.txt"]);
     app.unmount();

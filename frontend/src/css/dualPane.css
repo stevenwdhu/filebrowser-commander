@@ -4,11 +4,14 @@
 /* Set inline on <html> by DualPaneHost */
 :root {
   --dual-pane-width: 0px;
+  --dual-pane-bar-height: 2.75em;
 }
 
-/* Left pane: the normal listing, narrowed */
+/* Left pane: the normal listing, narrowed, and below its path bar (DualPaneHost), which replaces
+   the listing's breadcrumbs */
 html.dual-pane #main {
   width: calc(100% - var(--dual-pane-width));
+  padding-top: calc(var(--header-height) + var(--dual-pane-bar-height));
 }
 
 html.dual-pane #shelf,
@@ -16,8 +19,30 @@ html.dual-pane #status-bar {
   right: var(--dual-pane-width);
 }
 
-/* The listing's scrollbar thumb is fixed to the viewport edge; keep it, hidden, inside the left pane */
+/* The shelf with the column headers is spaced like the right pane's header */
+html.dual-pane #breadcrumbs {
+  display: none;
+}
+
+html.dual-pane #shelf {
+  padding-top: 0.25em;
+}
+
+/* ListingView pads by inline style for the breadcrumbs it expects outside the root. This puts the
+   rows level with the right pane's: the shelf's 0.25em, the column headers' 3.025em, then the
+   right pane's 0.5em under its headers and 0.3em above its list. */
+html.dual-pane #main .listing-view-root {
+  padding-top: 4.075em !important;
+}
+
+html.dual-pane #main .listing-view-root:has(> .listing-items.font-size-large) {
+  padding-top: 4.1em !important;
+}
+
+/* The listing's scrollbar thumb is fixed to the viewport edge; keep it, hidden, inside the left pane,
+   and with its letter below the left pane's path bar (Scrollbar.vue places them at 4em and 5.5em) */
 html.dual-pane #main .thumb {
+  top: calc(4em + var(--dual-pane-bar-height));
   right: calc(var(--dual-pane-width) + 0.25em);
 }
 
@@ -27,6 +52,7 @@ html.dual-pane #main .thumb:not(.visible) {
 }
 
 html.dual-pane #main .thumb-section-id {
+  top: calc(5.5em + var(--dual-pane-bar-height));
   right: calc(var(--dual-pane-width) + 3em);
 }
 
@@ -57,14 +83,26 @@ html.dual-pane-resizing * {
   flex: 0 0 auto;
   align-items: center;
   gap: 0.25em;
-  min-height: 2.75em;
+  box-sizing: border-box;
+  height: var(--dual-pane-bar-height);
   padding: 0.25em 0.5em;
   border-top: 2px solid transparent;
   border-bottom: 1px solid var(--divider);
 }
 
-.dual-pane-right.is-active .dual-pane-pathbar {
+.dual-pane-pathbar.is-active {
   border-top-color: var(--primaryColor);
+}
+
+/* The left pane's, level with the right pane's */
+.dual-pane-left-bar {
+  position: fixed;
+  top: var(--header-height);
+  right: var(--dual-pane-width);
+  z-index: 2;
+  padding-left: calc(0.5em + var(--safe-area-left));
+  background: var(--background);
+  transition: left 0.2s ease;
 }
 
 .dual-pane-pathbar button {
@@ -127,6 +165,11 @@ html.dual-pane-resizing * {
   font-weight: 500;
 }
 
+/* The left folder changed on the server since it loaded */
+.dual-pane-pathbar-crumb.has-update {
+  color: var(--primaryColor);
+}
+
 .dual-pane-pathbar-separator {
   flex: 0 0 auto;
   color: var(--textSecondary);
@@ -163,10 +206,27 @@ html.dual-pane-resizing * {
   cursor: pointer;
 }
 
-/* The ".." row has no size or date of its own */
+/* The ".." rows have no size or dates of their own */
 .dual-pane-list .listing-item[data-name=".."] .size,
-.dual-pane-list .listing-item[data-name=".."] .modified {
+.dual-pane-list .listing-item[data-name=".."] .modified,
+#main .listing-item[data-parent] :is(.size, .modified, .kind, .created, .duration) {
   visibility: hidden;
+}
+
+#main .listing-item[data-parent] :is(.download-icon, .overlay-icon) {
+  display: none;
+}
+
+/* The listing marks its own top group as the first; with the left ".." above it, it isn't. Its
+   selection frame then draws its own top edge, which the listing leaves to the first row's border. */
+html.dual-pane #main .listing-items.compact > .dual-pane-parent-group ~ .firstGroup .listing-item:first-child {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+html.dual-pane #main .listing-items.compact > .dual-pane-parent-group ~ .firstGroup .listing-item:first-child::before {
+  border-top: var(--borderWidth) solid var(--primaryColor);
 }
 
 /* Controls that only work in the main listing */
@@ -191,6 +251,21 @@ html.dual-pane-resizing * {
 
 .dual-pane-right.is-active .listing-item.activebutton.dual-pane-cursor {
   outline-color: #fff;
+}
+
+/* The left pane's cursor, which is only ever on its ".." (its selection is the cursor otherwise) */
+#main .listing-item.dual-pane-cursor {
+  outline: 1px dashed color-mix(in srgb, var(--textPrimary) 40%, transparent);
+  outline-offset: -2px;
+}
+
+html[data-dual-pane-active="left"] #main .listing-item.dual-pane-cursor {
+  outline: 2px solid var(--primaryColor);
+}
+
+/* Single-click users see the cursor only while the keyboard moves it (store/dualPane.js cursorHidden) */
+html[data-dual-pane-cursor="hidden"] :is(.dual-pane-right, #main) .listing-item.dual-pane-cursor {
+  outline: none;
 }
 
 /* Selections stay visible in the inactive pane, but read as passive */
@@ -314,18 +389,6 @@ html.dual-pane-resizing .dual-pane-divider {
   background: color-mix(in srgb, var(--primaryColor) 45%, transparent);
 }
 
-/* Active-pane bar over the left pane, matching the right pane's path bar */
-.dual-pane-left-indicator {
-  position: fixed;
-  top: var(--header-height);
-  right: var(--dual-pane-width);
-  left: 0;
-  z-index: 2;
-  height: 2px;
-  background: var(--primaryColor);
-  pointer-events: none;
-}
-
 /* Right-pane menu */
 .dual-pane-menu-backdrop {
   position: fixed;
@@ -382,6 +445,7 @@ html.dual-pane-resizing .dual-pane-divider {
 }
 
 /* Where a drag from the other pane would land */
+.dual-pane-pathbar-crumb.dual-pane-drop-target,
 .listing-item.dual-pane-drop-target,
 .dual-pane-list.dual-pane-drop-target,
 #main.dual-pane-drop-target {

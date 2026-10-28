@@ -17,6 +17,7 @@ import {
   openRight,
   otherPaneContext,
   paneContext,
+  paneLocation,
   refreshRight,
   rightSelection,
   rightViewMode,
@@ -98,6 +99,81 @@ function moveByRows(direction, extend, { page = false } = {}) {
 function showLeftFolder(source, path) {
   leftNavigation.expected = locationKey(source, path);
   void router.push({ path: buildItemUrl(source, normalizeDirPath(path)) });
+}
+
+/** A folder in a new browser tab, as a middle click on a link would open it. */
+export function openFolderInNewTab(source, path) {
+  if (source) window.open(buildItemUrl(source, normalizeDirPath(path), true), "_blank");
+}
+
+/** Browse the left pane from its own path bar or ".." row, which leaves it the active pane. */
+export function openLeft(source, path) {
+  if (source) void router.push({ path: buildItemUrl(source, normalizeDirPath(path)) });
+}
+
+/** The left pane's "..": its parent folder, with the folder it came from selected, as the right pane's ".." does. */
+export function openLeftParent({ newTab = false } = {}) {
+  const { source, path } = paneLocation("left");
+  if (!source || path === "/") return;
+  if (newTab) {
+    openFolderInNewTab(source, parentDir(path));
+    return;
+  }
+  // Files.vue selects this entry once the parent folder has loaded
+  state.pendingHighlight = { path: path.replace(/\/+$/, ""), source };
+  openLeft(source, parentDir(path));
+}
+
+function leftParentRow() {
+  return document.querySelector("#main .listing-item[data-parent]");
+}
+
+// The left listing's rows in the order they're shown (pinned, folders, files), without ".."
+function leftRows() {
+  return Array.from(document.querySelectorAll("#main .listing-item[data-index]"));
+}
+
+/**
+ * Where the left selection sits relative to the ".." row, for the keymap: { onParent, first,
+ * topRow }, first when the one selected entry is the top one, topRow when nothing is above it on
+ * screen. Null without a ".." row (the root, single-pane mode).
+ */
+export function leftParentPosition() {
+  if (!leftParentRow()) return null;
+  const position = { onParent: dualPane.leftOnParent, first: false, topRow: false };
+  if (state.selected.length !== 1) return position;
+  const rows = leftRows();
+  const selected = rows.find((row) => Number(row.dataset.index) === state.selected[0]);
+  if (!selected) return position;
+  position.first = selected === rows[0];
+  // In the card layouts the top row holds several entries
+  const sameRow = Math.abs(entryRect(selected).top - entryRect(rows[0]).top) < selected.offsetHeight / 2;
+  position.topRow = position.first || (isCardMode(getters.viewMode()) && sameRow);
+  return position;
+}
+
+/** Put the left pane's keyboard cursor on its ".." row, which clears the selection like the right pane's does. */
+function focusLeftParent() {
+  const row = leftParentRow();
+  if (!row) return;
+  mutations.resetSelected();
+  // After the reset, which clears the flag
+  dualPane.leftOnParent = true;
+  row.focus({ preventScroll: true });
+  // ".." is the top row: scrolled into view it would sit under the header and path bar
+  document.getElementById("main")?.scrollTo?.({ top: 0, behavior: "smooth" });
+}
+
+/** Take the cursor off "..", onto the top entry when asked; in an empty folder it stays. */
+function leaveLeftParent({ selectFirst = false } = {}) {
+  const first = selectFirst ? leftRows()[0] : null;
+  if (selectFirst && !first) return;
+  dualPane.leftOnParent = false;
+  if (!first) return;
+  mutations.resetSelected();
+  mutations.addSelected(Number(first.dataset.index));
+  first.focus({ preventScroll: true });
+  first.scrollIntoView?.({ block: "nearest" });
 }
 
 /** Open a right-pane row: folders (and "..") browse the pane, files open in the main view. */
@@ -260,8 +336,14 @@ function switchPane() {
     rightListElement()?.focus({ preventScroll: true });
     return;
   }
-  // Focus a left row so the next Tab comes back; Shift+Tab leaves the panes as usual
-  const left = document.querySelector('#main .listing-item[aria-selected="true"]') || document.querySelector("#main .listing-item");
+  // Focus a left row so the next Tab comes back; Shift+Tab leaves the panes as usual. With nothing
+  // selected the cursor goes on "..", the top row.
+  const selected = document.querySelector('#main .listing-item[aria-selected="true"]');
+  if (!selected && leftParentRow()) {
+    focusLeftParent();
+    return;
+  }
+  const left = selected || leftRows()[0];
   if (left) {
     left.focus({ preventScroll: true });
   } else {
@@ -327,6 +409,9 @@ export const dualPaneCommands = {
   info: showInfo,
   newFolder,
   refresh: () => refreshRight(),
+  leftParentFocus: focusLeftParent,
+  leftParentOpen: () => openLeftParent(),
+  leftParentLeave: leaveLeftParent,
   openMenu: () => {
     const row = document.querySelector(".dual-pane-right .dual-pane-cursor");
     const rect = (row || rightListElement())?.getBoundingClientRect();

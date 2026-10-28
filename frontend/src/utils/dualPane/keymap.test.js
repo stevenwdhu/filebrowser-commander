@@ -47,6 +47,38 @@ describe("resolveDualPaneKey", () => {
     }
   });
 
+  it("moves the left pane's cursor onto its '..' and acts on it there", () => {
+    const left = (leftParent) => ({ active: "left", leftParent });
+    const top = { onParent: false, first: true, topRow: true };
+    expect(key({ key: "ArrowUp" }, left(top))).toEqual({ cmd: "leftParentFocus" });
+    expect(key({ key: "ArrowLeft" }, left(top))).toEqual({ cmd: "leftParentFocus" });
+    expect(key({ key: "Home" }, left({ onParent: false, first: false, topRow: false }))).toEqual({ cmd: "leftParentFocus" });
+    // A card layout's top row: Up from any entry on it, Left only from the first
+    const cardTop = { onParent: false, first: false, topRow: true };
+    expect(key({ key: "ArrowUp" }, left(cardTop))).toEqual({ cmd: "leftParentFocus" });
+    expect(key({ key: "ArrowLeft" }, left(cardTop))).toBeNull();
+    // Lower down, with modifiers, or without a ".." (the root), the listing keeps the keys
+    expect(key({ key: "ArrowUp" }, left({ onParent: false, first: false, topRow: false }))).toBeNull();
+    expect(key({ key: "ArrowUp", shiftKey: true }, left(top))).toBeNull();
+    expect(key({ key: "ArrowUp", altKey: true }, left(top))).toBeNull();
+    expect(key({ key: "Home" }, left(null))).toBeNull();
+
+    const on = { onParent: true, first: false, topRow: false };
+    expect(key({ key: "Enter" }, left(on))).toEqual({ cmd: "leftParentOpen" });
+    expect(key({ key: "ArrowDown", altKey: true }, left(on))).toEqual({ cmd: "leftParentOpen" });
+    expect(key({ key: "ArrowDown" }, left(on))).toEqual({ cmd: "leftParentLeave", args: { selectFirst: true } });
+    expect(key({ key: "ArrowRight" }, left(on))).toEqual({ cmd: "leftParentLeave", args: { selectFirst: true } });
+    expect(key({ key: "ArrowUp" }, left(on))).toEqual({ cmd: "noop" });
+    expect(key({ key: "Home" }, left(on))).toEqual({ cmd: "noop" });
+    expect(key({ key: "Escape" }, left(on))).toEqual({ cmd: "leftParentLeave" });
+    // The rest stays the listing's (type-ahead, Backspace, Delete, Alt+Up), and a focused button keeps Enter
+    for (const init of [{ key: "a" }, { key: "Backspace" }, { key: "Delete" }, { key: "ArrowUp", altKey: true }]) {
+      expect(key(init, left(on))).toBeNull();
+    }
+    expect(key({ key: "Enter" }, left(on), element("<button>Refresh</button>"))).toBeNull();
+    expect(key({ key: "Enter" }, { ...left(on), promptOpen: true })).toBeNull();
+  });
+
   it("switches panes with Tab only from a listing, and leaves Shift+Tab to move focus out", () => {
     const list = element('<div class="dual-pane-list" tabindex="-1"></div>');
     const leftRow = element('<a class="listing-item" tabindex="0">row</a>');

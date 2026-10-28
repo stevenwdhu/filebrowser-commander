@@ -1,5 +1,6 @@
 <template>
-  <div class="dual-pane-pathbar">
+  <!-- One per pane: the right pane's in its panel, the left pane's from DualPaneHost in place of the listing's breadcrumbs -->
+  <div class="dual-pane-pathbar" :class="{ 'is-active': isActive }" @keydown="onKeydown">
     <button
       type="button"
       class="dual-pane-pathbar-source"
@@ -8,10 +9,20 @@
       @click="openPicker"
     >
       <i class="material-symbols" aria-hidden="true">storage</i>
-      <span>{{ right.source }}</span>
+      <span>{{ location.source }}</span>
     </button>
+    <!-- Crumbs carry their folder in data-path: drops on them go through the copy/move prompt (utils/dualPane/dragDrop.js) -->
     <nav ref="crumbs" class="dual-pane-pathbar-crumbs" :aria-label="$t('general.path', { suffix: '' })">
-      <button type="button" class="dual-pane-pathbar-crumb" :title="rootLabel" :aria-label="rootLabel" @click="go('/')">
+      <button
+        type="button"
+        class="dual-pane-pathbar-crumb"
+        data-path="/"
+        :title="rootLabel"
+        :aria-label="rootLabel"
+        :aria-current="location.path === '/' ? 'location' : undefined"
+        @click="go('/')"
+        @auxclick="onAuxClick('/', $event)"
+      >
         <i class="material-symbols" aria-hidden="true">home</i>
       </button>
       <template v-for="segment in segments" :key="segment.path">
@@ -19,8 +30,11 @@
         <button
           type="button"
           class="dual-pane-pathbar-crumb"
-          :aria-current="segment.path === right.path ? 'location' : undefined"
+          :class="{ 'has-update': hasUpdate && segment.path === location.path }"
+          :data-path="segment.path"
+          :aria-current="segment.path === location.path ? 'location' : undefined"
           @click="go(segment.path)"
+          @auxclick="onAuxClick(segment.path, $event)"
         >{{ segment.name }}</button>
       </template>
     </nav>
@@ -30,7 +44,7 @@
         class="dual-pane-pathbar-action"
         :title="$t('buttons.refresh')"
         :aria-label="$t('buttons.refresh')"
-        @click="run('refresh')"
+        @click="refresh"
       >
         <i class="material-symbols" aria-hidden="true">autorenew</i>
       </button>
@@ -43,7 +57,9 @@
       >
         <i class="material-symbols" aria-hidden="true">dock_to_right</i>
       </button>
+      <!-- On the right only: on the left it would read as closing that pane -->
       <button
+        v-if="pane === 'right'"
         type="button"
         class="dual-pane-pathbar-action"
         :title="hideLabel"
@@ -59,30 +75,47 @@
 <script>
 import { mutations, state } from "@/store";
 import { eventBus } from "@/store/eventBus";
-import { dualPane, openRight, setActivePane } from "@/store/dualPane.js";
-import { dualPaneCommands } from "@/utils/dualPane/commands.js";
+import { dualPane, openRight, paneLocation, refreshRight, setActivePane } from "@/store/dualPane.js";
+import { dualPaneCommands, openFolderInNewTab, openLeft } from "@/utils/dualPane/commands.js";
 import { breadcrumbSegments } from "@/utils/dualPane/paneModel.js";
+import { invalidateDirMetadataCache } from "@/utils/metadataCache.js";
 
 let pickerCount = 0;
+// Keys a focused button handles itself; the left listing's window handler must not see them
+const BUTTON_KEYS = new Set([" ", "Enter"]);
 
 export default {
   name: "DualPanePathBar",
+  props: {
+    pane: {
+      type: String,
+      default: "right",
+      validator: (value) => value === "left" || value === "right",
+    },
+  },
   data: () => ({
     pendingPickerId: null,
   }),
   computed: {
-    right() {
-      return dualPane.right;
+    location() {
+      return paneLocation(this.pane);
     },
     segments() {
-      return breadcrumbSegments(dualPane.right.path);
+      return breadcrumbSegments(this.location.path);
+    },
+    isActive() {
+      return dualPane.active === this.pane;
+    },
+    // The server said the left folder changed since it loaded, as the listing's breadcrumbs show it
+    hasUpdate() {
+      return this.pane === "left" && Boolean(state.req?.hasUpdate);
     },
     // Starts with the visible source name, so voice control can find it
     sourceLabel() {
-      return `${this.right.source || ""}, ${this.$t("sidebar.chooseSource")}`;
+      return `${this.location.source || ""}, ${this.$t("sidebar.chooseSource")}`;
     },
     rootLabel() {
-      return this.right.source || this.$t("general.home", { suffix: "" });
+      return this.location.source || this.$t("general.home", { suffix: "" });
     },
     showInOtherLabel() {
       return `${this.$t("dualPane.showInOtherPane")} (Alt+I)`;
@@ -92,10 +125,14 @@ export default {
     },
   },
   watch: {
-    async segments() {
-      await this.$nextTick();
-      const crumbs = this.$refs.crumbs;
-      if (crumbs) crumbs.scrollLeft = crumbs.scrollWidth;
+    // Also on mount: the left bar first appears on whatever folder the listing is in
+    segments: {
+      immediate: true,
+      async handler() {
+        await this.$nextTick();
+        const crumbs = this.$refs.crumbs;
+        if (crumbs) crumbs.scrollLeft = crumbs.scrollWidth;
+      },
     },
   },
   created() {
@@ -110,13 +147,42 @@ export default {
     run(command) {
       dualPaneCommands[command]({});
     },
+    open(source, path) {
+      if (this.pane === "right") {
+        void openRight(source, path);
+      } else {
+        openLeft(source, path);
+      }
+    },
     go(path) {
-      void openRight(this.right.source, path);
+      // The left pane's own folder doesn't reload by navigating to it
+      if (this.pane === "left" && path === this.location.path) {
+        this.refresh();
+        return;
+      }
+      this.open(this.location.source, path);
+    },
+    onAuxClick(path, event) {
+      if (event.button !== 1) return;
+      event.preventDefault();
+      openFolderInNewTab(this.location.source, path);
+    },
+    refresh() {
+      if (this.pane === "right") {
+        refreshRight();
+        return;
+      }
+      // As F4 does
+      invalidateDirMetadataCache();
+      mutations.setReload(true);
     },
     showInOther() {
-      // The button acts on this pane even when the left one is active
-      setActivePane("right");
+      // The button acts on this pane even when the other one is active
+      setActivePane(this.pane);
       dualPaneCommands.showInOther();
+    },
+    onKeydown(event) {
+      if (BUTTON_KEYS.has(event.key) && event.target?.closest?.("button")) event.stopPropagation();
     },
     openPicker() {
       pickerCount += 1;
@@ -124,8 +190,8 @@ export default {
       mutations.showPrompt({
         name: "pathPicker",
         props: {
-          currentPath: this.right.path,
-          currentSource: this.right.source || state.sources.current,
+          currentPath: this.location.path,
+          currentSource: this.location.source || state.sources.current,
           showFiles: false,
           showFolders: true,
           selectionContextId: this.pendingPickerId,
@@ -136,7 +202,7 @@ export default {
       if (!data || !this.pendingPickerId || data.selectionContextId !== this.pendingPickerId) return;
       this.pendingPickerId = null;
       if (typeof data.source === "string" && typeof data.path === "string") {
-        void openRight(data.source, data.path);
+        this.open(data.source, data.path);
       }
     },
     onPathPickerCancelled(data) {

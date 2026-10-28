@@ -33,6 +33,8 @@
         </div>
       </div>
 
+      <LeftParentRow :empty="numDirs + numFiles + numPinned === 0" />
+
       <!-- Empty state -->
       <template v-if="numDirs + numFiles + numPinned === 0">
         <h2 class="message font-size-large">
@@ -198,6 +200,7 @@ import { url } from "@/utils";
 import Item from "@/components/files/ListingItem.vue";
 import Upload from "@/components/prompts/Upload.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
+import LeftParentRow from "@/components/dualPane/LeftParentRow.vue";
 import {
   isTypeAheadSessionActive,
   processTypeAheadKey,
@@ -211,6 +214,7 @@ export default {
     Item,
     Upload,
     LoadingSpinner,
+    LeftParentRow,
   },
   data() {
     return {

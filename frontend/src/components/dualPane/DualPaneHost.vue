@@ -1,5 +1,8 @@
 <template>
   <template v-if="mountedPane">
+    <!-- The left pane's path bar, over the listing's breadcrumbs, which dualPane.css hides meanwhile.
+         Ahead of the right pane, so it comes first in tab order. -->
+    <DualPanePathBar v-show="shown" pane="left" class="dual-pane-left-bar" :style="{ left: sidebarOffset }" />
     <DualPanePanel v-show="shown" />
     <div
       v-show="shown"
@@ -17,12 +20,6 @@
       @keydown.left.prevent.stop="stepRatio(0.05)"
       @keydown.right.prevent.stop="stepRatio(-0.05)"
     ></div>
-    <div
-      v-show="shown && leftActive"
-      class="dual-pane-left-indicator"
-      :style="{ left: sidebarOffset }"
-      aria-hidden="true"
-    ></div>
   </template>
 </template>
 
@@ -33,7 +30,9 @@ import { getters, mutations, state } from "@/store";
 import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
 import { eventBus } from "@/store/eventBus";
 import DualPanePanel from "@/components/dualPane/DualPanePanel.vue";
+import DualPanePathBar from "@/components/dualPane/DualPanePathBar.vue";
 import {
+  cursorHidden,
   dualPane,
   ensureRightLoaded,
   followGallerySize,
@@ -44,7 +43,13 @@ import {
   setActivePane,
   setPaneRatio,
 } from "@/store/dualPane.js";
-import { leftNavigation, locationKey, openedFromRight, runDualPaneCommand } from "@/utils/dualPane/commands.js";
+import {
+  leftNavigation,
+  leftParentPosition,
+  locationKey,
+  openedFromRight,
+  runDualPaneCommand,
+} from "@/utils/dualPane/commands.js";
 import { resolveDualPaneKey } from "@/utils/dualPane/keymap.js";
 import { paneDragHandlers } from "@/utils/dualPane/dragDrop.js";
 
@@ -56,7 +61,7 @@ const TRAILING_RESIZE_MS = 150;
 
 export default {
   name: "DualPaneHost",
-  components: { DualPanePanel },
+  components: { DualPanePanel, DualPanePathBar },
   data: () => ({
     lastShown: false,
     lastLeft: null,
@@ -84,9 +89,6 @@ export default {
     activeSide() {
       return dualPane.active;
     },
-    leftActive() {
-      return dualPane.active === "left";
-    },
     // Space a sticky sidebar takes on the left, as Layout pads #main
     stickySidebar() {
       return getters.isStickySidebar() && getters.isSidebarVisible();
@@ -99,6 +101,9 @@ export default {
     },
     layoutKey() {
       return [this.shown, dualPane.ratio, this.sidebarOffset].join("|");
+    },
+    cursorHidden() {
+      return cursorHidden();
     },
     leftLocation() {
       if (getters.currentView() !== "listingView") return null;
@@ -122,6 +127,7 @@ export default {
           if (dualPane.right.stale) refreshRight();
         } else {
           dualPane.menu = null;
+          dualPane.leftOnParent = false;
         }
       },
     },
@@ -131,12 +137,24 @@ export default {
         this.applyLayout();
       },
     },
+    // dualPane.css hides the cursor outline by this
+    cursorHidden: {
+      immediate: true,
+      handler(hidden) {
+        if (hidden) {
+          document.documentElement.dataset.dualPaneCursor = "hidden";
+        } else {
+          delete document.documentElement.dataset.dualPaneCursor;
+        }
+      },
+    },
     // Separate from the layout so switching panes doesn't fire resize events
     activeSide(active) {
       if (this.shown) document.documentElement.dataset.dualPaneActive = active;
     },
     leftLocation(location) {
       if (!location) return;
+      dualPane.leftOnParent = false;
       if (location === leftNavigation.expected) {
         leftNavigation.expected = null;
       } else if (location !== this.lastLeft && this.lastLeft !== null) {
@@ -161,6 +179,11 @@ export default {
     }, { flush: "sync" });
     this.stopSortWatch = this.$watch(() => getters.pickerSorting(), () => resortRight(), { deep: true });
     this.stopSizeWatch = this.$watch(() => state.user?.gallerySize, (size) => followGallerySize(size));
+    // Any change to the left selection takes the cursor off "..": synchronously, so a command can
+    // clear the selection and then put the cursor there
+    this.stopSelectionWatch = this.$watch(() => [state.selected, state.selected?.length], () => {
+      dualPane.leftOnParent = false;
+    }, { flush: "sync" });
     eventBus.on("itemsDeleted", refreshRight);
     eventBus.on("itemsRenamed", refreshRight);
     window.addEventListener("keydown", this.onKeydown, true);
@@ -181,6 +204,7 @@ export default {
     this.stopReloadWatch?.();
     this.stopSortWatch?.();
     this.stopSizeWatch?.();
+    this.stopSelectionWatch?.();
     eventBus.off("itemsDeleted", refreshRight);
     eventBus.off("itemsRenamed", refreshRight);
     window.removeEventListener("keydown", this.onKeydown, true);
@@ -192,6 +216,7 @@ export default {
     }
     cancelAnimationFrame(this.resizeFrame);
     clearTimeout(this.resizeTimer);
+    delete document.documentElement.dataset.dualPaneCursor;
     dualPane.shown = false;
     dualPane.available = false;
     this.clearLayout();
@@ -237,6 +262,7 @@ export default {
         promptOpen: Boolean(getters.currentPromptName()),
         searchActive: Boolean(state.isSearchActive),
         menuOpen: Boolean(dualPane.menu),
+        leftParent: this.shown && dualPane.active === "left" ? leftParentPosition() : null,
       };
     },
     onKeydown(event) {
@@ -244,6 +270,7 @@ export default {
       if (!command) return;
       event.preventDefault();
       event.stopPropagation();
+      if (command.cmd !== "noop") dualPane.keyboardCursor = true;
       runDualPaneCommand(command);
     },
     // Ctrl+V while the right pane is active must not paste into the left pane's folder
@@ -253,6 +280,7 @@ export default {
       event.stopPropagation();
     },
     onPointerDown(event) {
+      dualPane.keyboardCursor = false;
       // The function-key bar acts on whichever pane is active, so using it doesn't switch panes
       if (!this.shown || event.target?.closest?.(".dual-pane-keybar")) return;
       const side = paneSideOfElement(event.target);

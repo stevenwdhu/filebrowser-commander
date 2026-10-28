@@ -3,11 +3,12 @@
 //
 // The handlers run on document in the capture phase. Drops they own are stopped there, before the
 // listing's own handlers (which move whatever is selected on the left) can see them. Drags that start
-// and end in the left pane, or end on its breadcrumbs or the sidebar tree, are left to the app.
+// and end in the left pane, or end on the sidebar tree, are left to the app, except on the path bars'
+// folders and the left pane's "..", which only the panes handle.
 import { normalizeDirPath } from "@/utils/moveCopyDestinations.js";
 import { moveCopyBlockReason } from "@/utils/moveCopyPlan.js";
-import { isParentEntry } from "@/utils/dualPane/paneModel.js";
-import { dualPane, paneContext, paneSideOfElement, rightSelection, setActivePane } from "@/store/dualPane.js";
+import { isParentEntry, parentDir } from "@/utils/dualPane/paneModel.js";
+import { dualPane, paneContext, paneLocation, paneSideOfElement, rightSelection, setActivePane } from "@/store/dualPane.js";
 import { transfer } from "@/utils/dualPane/commands.js";
 
 export const PANE_DRAG_TYPE = "application/x-filebrowser-dual-pane";
@@ -42,12 +43,24 @@ function rightFolderOf(row) {
   return { source: entry.source || dualPane.right.source, path: normalizeDirPath(entry.path), isParent: isParentEntry(entry) };
 }
 
+// A path bar folder, or the left pane's "..", from either pane
+function claimedFolder(element, side) {
+  const crumb = element.closest?.(".dual-pane-pathbar-crumb[data-path]");
+  if (crumb) return { folder: { source: paneLocation(side).source, path: crumb.dataset.path }, element: crumb };
+  const parent = side === "left" ? element.closest?.("#main .listing-item[data-parent]") : null;
+  if (!parent) return null;
+  const left = paneLocation("left");
+  return { folder: { source: left.source, path: parentDir(left.path) }, element: parent };
+}
+
 /**
  * Where a drag over this element would drop: { side, folder, element } when the pane handles it,
  * { blocked: true } when it must not land there, or null to leave it to the app.
  */
 export function dropTarget(element, origin) {
   const side = paneSideOfElement(element);
+  const claimed = side ? claimedFolder(element, side) : null;
+  if (claimed) return { side, ...claimed };
   const ownsDrop = origin === "right" || side === "right";
   if (!side || element.closest?.("#shelf")) {
     return ownsDrop ? { blocked: true } : null;

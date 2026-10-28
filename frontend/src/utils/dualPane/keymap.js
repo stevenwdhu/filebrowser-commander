@@ -1,7 +1,8 @@
 // Which dual-pane command, if any, a keydown maps to. Pure and table driven: anything not listed
 // returns null and is left to the rest of the app (ListingView, Files.vue shortcuts, search).
 //
-// ctx: { available, shown, active: "left" | "right", promptOpen, searchActive, menuOpen }
+// ctx: { available, shown, active: "left" | "right", promptOpen, searchActive, menuOpen, leftParent }
+// leftParent: where the left selection is next to its ".." row, from leftParentPosition, or null
 
 const REPEATABLE = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown"]);
 // Keys the left listing acts on; while the right pane is active they must never reach it
@@ -151,6 +152,27 @@ function resolveRight(event) {
   }
 }
 
+// The left pane is the app's own listing, which has no ".." row: only the keys that move onto it,
+// and the ones that act on it while the cursor is there, are the pane's
+function resolveLeft(event, position) {
+  if (!position || ctrlOrMeta(event) || event.shiftKey) return null;
+  const { key } = event;
+  if (position.onParent) {
+    if (event.altKey) return key === "ArrowDown" ? { cmd: "leftParentOpen" } : null;
+    if (key === "Enter") return { cmd: "leftParentOpen" };
+    if (key === "ArrowDown" || key === "ArrowRight") return { cmd: "leftParentLeave", args: { selectFirst: true } };
+    // Nothing above it; the listing would select its top entry instead
+    if (key === "ArrowUp" || key === "ArrowLeft" || key === "Home") return { cmd: "noop" };
+    if (key === "Escape") return { cmd: "leftParentLeave" };
+    return null;
+  }
+  if (event.altKey) return null;
+  if (key === "Home" || (key === "ArrowUp" && position.topRow) || (key === "ArrowLeft" && position.first)) {
+    return { cmd: "leftParentFocus" };
+  }
+  return null;
+}
+
 /** The command for a keydown, or null to let the app handle it. */
 export function resolveDualPaneKey(event, ctx) {
   // With both panes shown F5-F8 are the pane's, so the browser's own (reload, caret browsing)
@@ -169,8 +191,9 @@ export function resolveDualPaneKey(event, ctx) {
   }
   if (event.repeat && !REPEATABLE.has(event.key)) return null;
   const global = resolveGlobal(event, ctx);
-  if (global || !ctx.shown || ctx.active !== "right") return global;
+  if (global || !ctx.shown) return global;
   if (nativeKeys(event.target).has(event.key)) return null;
+  if (ctx.active !== "right") return resolveLeft(event, ctx.leftParent);
   const command = resolveRight(event);
   if (command) return command;
   // Modified listing keys (Ctrl+Delete, Ctrl+Enter...) would still act on the left selection;

@@ -37,6 +37,7 @@ function layout() {
     <aside id="sidebar"><span class="tree">tree</span></aside>
     <div id="main">
       <div id="shelf"><a class="crumb">left</a></div>
+      <div class="listing-item" data-parent="true" data-dir="true"><span class="name">..</span></div>
       <a class="listing-item" data-name="sub" data-dir="true"><span class="name">sub</span></a>
       <a class="listing-item" data-name="a.txt" data-dir="false"><span class="name">a.txt</span></a>
       <div class="empty">space</div>
@@ -45,7 +46,12 @@ function layout() {
       <div class="listing-item" data-path="/" data-dir="true">..</div>
       <div class="listing-item" data-path="/r/pics/" data-dir="true">pics</div>
       <div class="listing-item" data-path="/r/b.txt" data-dir="false">b.txt</div>
-    </div></section>`;
+    </div><div class="dual-pane-pathbar"><button class="dual-pane-pathbar-crumb" data-path="/r/">r</button></div></section>
+    <div class="dual-pane-pathbar dual-pane-left-bar">
+      <button class="dual-pane-pathbar-source">tank</button>
+      <button class="dual-pane-pathbar-crumb" data-path="/"><i>home</i></button>
+      <button class="dual-pane-pathbar-crumb" data-path="/left/">left</button>
+    </div>`;
   document.body.append(root);
 }
 const $ = (selector) => root.querySelector(selector);
@@ -96,6 +102,41 @@ describe("pane drag and drop", () => {
     expect(dropTarget($("[data-path='/r/pics/']"), "left").folder).toMatchObject({ source: "backup", path: "/r/pics/" });
     expect(dropTarget($("[data-path='/']"), "left").folder).toMatchObject({ source: "backup", path: "/" });
     expect(dropTarget($("[data-path='/r/b.txt']"), "left").folder).toEqual({ source: "backup", path: "/r/" });
+  });
+
+  it("takes drops on the path bars' folders and the left '..' from either pane", () => {
+    // The left bar and "..": from the left too, which the listing has no drop handling for
+    expect(dropTarget($(".dual-pane-left-bar [data-path='/'] i"), "left")).toMatchObject({ side: "left", folder: { source: "tank", path: "/" } });
+    expect(dropTarget($(".dual-pane-left-bar [data-path='/left/']"), "right").folder).toEqual({ source: "tank", path: "/left/" });
+    expect(dropTarget($("#main [data-parent] .name"), "left")).toMatchObject({ side: "left", folder: { source: "tank", path: "/" } });
+    expect(dropTarget($("#main [data-parent]"), "right").element).toBe($("#main [data-parent]"));
+    // The right bar's folders, from either pane
+    expect(dropTarget($(".dual-pane-right [data-path='/r/']"), "right")).toMatchObject({ side: "right", folder: { source: "backup", path: "/r/" } });
+    expect(dropTarget($(".dual-pane-right [data-path='/r/']"), "left").element).toBe($(".dual-pane-right [data-path='/r/']"));
+    // The rest of the left bar is the left pane, like its empty space
+    expect(dropTarget($(".dual-pane-left-bar .dual-pane-pathbar-source"), "right").folder).toEqual({ source: "tank", path: "/left/" });
+    expect(dropTarget($(".dual-pane-left-bar .dual-pane-pathbar-source"), "left")).toBeNull();
+  });
+
+  it("moves the left selection up a folder when it's dropped on the left '..', through the prompt", () => {
+    paneDragHandlers.dragstart(drag("dragstart", $("#main [data-name='a.txt'] .name")));
+    const over = drag("dragover", $("#main [data-parent] .name"));
+    paneDragHandlers.dragover(over);
+    expect(over.defaultPrevented).toBe(true);
+    expect($("#main [data-parent]").classList.contains("dual-pane-drop-target")).toBe(true);
+    const drop = drag("drop", $("#main [data-parent] .name"));
+    paneDragHandlers.drop(drop);
+    expect(drop.defaultPrevented).toBe(true);
+    expect(mutations.showPrompt).toHaveBeenCalledWith(expect.objectContaining({
+      name: "move",
+      props: expect.objectContaining({ items: [expect.objectContaining({ path: "/left/a.txt" })], destination: { source: "tank", path: "/" } }),
+    }));
+    // Not onto the folder it's already in
+    paneDragHandlers.dragstart(drag("dragstart", $("#main [data-name='a.txt'] .name")));
+    const inPlace = drag("dragover", $(".dual-pane-left-bar [data-path='/left/']"));
+    paneDragHandlers.dragover(inPlace);
+    expect(inPlace.defaultPrevented).toBe(false);
+    expect(inPlace.dataTransfer.dropEffect).toBe("none");
   });
 
   it("leaves left-to-left drags to the app and blocks right-pane drags where they can't land", () => {
