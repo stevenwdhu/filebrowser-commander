@@ -1,139 +1,120 @@
-<div align="center">
+# FileBrowser Commander
 
-  [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0b548794f2ac4871a0cf7aa9ecab049f)](https://app.codacy.com/gh/gtsteffaniak/filebrowser/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-  [![latest version](https://img.shields.io/github/v/release/gtsteffaniak/filebrowser)](https://github.com/gtsteffaniak/filebrowser/releases)
-  [![DockerHub Pulls](https://img.shields.io/docker/pulls/gtstef/filebrowser?label=latest%20Docker%20pulls)](https://hub.docker.com/r/gtstef/filebrowser)
-  [![Apache-2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+A two-pane, keyboard-driven web file manager in the style of Total Commander, built on
+[FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser).
 
-  [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://github.com/gtsteffaniak/filebrowser/wiki/Q&A#is-there-a-way-to-donate-or-support-this-project)
+> [!NOTE]
+> FileBrowser Commander is a personal fork of FileBrowser Quantum. It's built on FileBrowser
+> Quantum's main branch, which is its beta channel, and rebased onto it as that moves. Everything
+> else (sources, users, sharing, search, previews, the API and `config.yaml`) works as in
+> FileBrowser Quantum, and [its docs](https://filebrowserquantum.com/) cover it. This fork isn't
+> affiliated with that project, so please report problems with it in this repository's issues,
+> not upstream's.
 
-  <img width="150" alt="FileBrowser Commander logo" src="https://github.com/user-attachments/assets/c40b22c9-33da-47b7-bc4c-ce69bb5cc174">
-  <h3>FileBrowser Commander</h3>
-  A fork of <a href="https://github.com/gtsteffaniak/filebrowser">FileBrowser Quantum</a> with a Commander-style two-pane layout (F5–F8 keys, drag and drop between the panes)
-  <br/>
-  and server-side copy and move that shows byte progress, speed and time left. The rest of this README is upstream's.
-  <br/><br/>
-  <img width="800" alt="FileBrowser Quantum file listing in dark mode" src="https://filebrowserquantum.com/images/generated/listing/view-mode-normal-dark.jpg">
-</div>
+## Why
 
-## Pinned
+Many SMB and SFTP clients copy between two folders on a NAS by downloading every byte and
+uploading it again. FileBrowser Quantum copies and moves on the NAS itself, so the data never
+crosses the network. This fork puts that behind a two-pane, Total Commander-style layout with the
+usual keys.
 
-:pushpin: [Read The Official Docs](https://filebrowserquantum.com/) (currently english-only)
+## What it adds
 
-:pushpin: [v2.0.0 is now stable!](https://filebrowserquantum.com/en/docs/getting-started/v2/about/) --> See [migration support discussion](https://github.com/gtsteffaniak/filebrowser/discussions/3105)
+**Two panes**
 
-## About
+- `Ctrl+\` or the header button opens a second pane beside the listing. `Tab` switches between
+  them once you've clicked into a pane.
+- Each pane has a path bar with a source picker, a `..` row, keyboard navigation and a
+  right-click menu (the second pane's is shorter). Each folder shows in its own saved view: list,
+  compact, normal, icons or gallery.
+- `F5` and `F6` open the copy or move prompt for the active pane's selection, aimed at the other
+  pane's folder. `F7` makes a folder and `F8` deletes.
+- Dragging between the panes opens the same prompt. `Ctrl`/`Alt` copies and `Shift`/`Cmd` moves;
+  otherwise it moves within a source and copies across sources.
+- A bottom bar holds the F5–F8 buttons and the size slider, and each pane has a status line with
+  its counts and size.
+- `F1` lists the keys. Two panes need a window at least 1024px wide, with 640px left beside a
+  pinned sidebar. Otherwise, and in shares, the layout stays single-pane.
 
-FileBrowser Quantum provides an easy way to access and manage your files from the web. It has a modern responsive interface that has many advanced features to manage users, access, sharing, and file preview and editing.
+**Copy and move**
 
-This version is called "Quantum" because it packs tons of advanced features into a tiny and easy-to-run file. Unlike the majority of alternative options, FileBrowser Quantum is simple to install and easy to configure.
+These apply to every copy and move done through the prompt (`F5`, `F6`, a drag between the
+panes, or Copy or Move in a menu), with one pane or two. Pasting, and dragging onto a folder in the
+main listing, work as in FileBrowser Quantum.
 
-The goal for this repo is to become the best open-source self-hosted file browsing application that exists -- **all for free**. This repo will always be free and open-source.
+- The prompt shows what's being copied or moved and where, and says why it can't go ahead, for
+  example a folder into its own subfolder.
+- The destination is picked in the prompt itself: switch source, click a folder in the path, type
+  a path, or pick one of your Favorites (your sidebar's folder links) or one of the last 8
+  destinations you used in this browser.
+- While it runs, the prompt shows the time elapsed and the items done. When data is really copied
+  (a copy, or a move between datasets, disks or separately mounted folders), it also shows the
+  current item's bytes, the speed and the time left. Any other move is a rename and finishes at
+  once.
+- Bytes, speed and time left need the Realtime permission ("Enable real-time connections and
+  updates"). An admin account this server creates, or resets from `adminPassword` in the config,
+  has it; for anyone else, an admin turns it on.
+- Copies still use `copy_file_range`, so ZFS block cloning still works where the pool has it on.
 
-Ready to try it out? See [Getting Started Docs](https://filebrowserquantum.com/en/docs/getting-started/).
+**Smaller changes**
 
-## How its different
+- The app calls itself FileBrowser Commander. Internal names, such as the login cookie, stay
+  upstream's.
+- The published image is built without upstream's opt-in usage reporting, shows its version as
+  `commander-<commit>`, and doesn't offer FileBrowser Quantum's updates.
 
-FileBrowser Quantum is a massive fork of the file browser open-source project with the following changes:
+## Run it
 
-  1. ✅ Better source configuration - multiple sources, include/exclude rules, and [more](https://filebrowserquantum.com/en/docs/configuration/sources/)
-  2. ✅ Login support for OIDC, LDAP, JWT, password + 2FA, and proxy.
-  3. ✅ Beautiful, Responsive, and Customizable user interface.
-  4. ✅ Streamlined configuration via `config.yaml` config file.
-  5. ✅ Efficient search
-     - Real-time search results as you type.
-     - Real-time monitoring and updates in the UI.
-     - Search supports file and folder sizes, along with various filters.
-  6. ✅ Better listing browsing
-     - Thumbnails support includes **office**, **video**, and **album artwork**, and **3D models**.
-     - Faster and more responsive views with animations.
-     - **Folder sizes** are displayed and support thumbnails
-     - Navigating remembers the last scroll position.
-     - WebDAV support
-     - Granular permissions
-  7. ✅ Highly configurable and [customizable sharing options](https://filebrowserquantum.com/en/docs/shares/options/)
-     - share expiration time
-     - users who can access share (including anonymous)
-     - styling and themes
-     - file viewing, editing, and uploading permissions
-  8. ✅ Access control that can be scoped to user or group and source path.
-  9. ✅ Developer API support
-     - Ability to create long-lived API Tokens.
-     - A helpful Swagger page is available at `/swagger` endpoint for API enabled users.
+Images are on GitHub's registry as `ghcr.io/stevenwdhu/filebrowser-commander`, for linux/amd64
+only. `latest` is the newest build of `main`, and a tag such as `sha-1a2b3c4` pins the build whose
+version shows as `commander-1a2b3c4`.
 
-Notable features that this fork *does not* have (removed):
- - ❌ shell commands are completely removed and will not be returned.
+1. Make a data folder with a `config.yaml` in it. The server won't start without one. This is
+   enough to begin with, and the [configuration docs](https://filebrowserquantum.com/en/docs/configuration/)
+   have the rest:
 
-FileBrowser Quantum differs significantly from the original version. Many of these changes required a significant overhaul. Creating a fork was a necessary process to make the program better. There have been many growing pains, but a stable release is planned and coming soon.
+   ```yaml
+   server:
+     sources:
+       - path: /srv
+   ```
 
-## The UI
+2. Start it, for example with Docker Compose:
 
-The UI has a simple three-component navigation system:
+   ```yaml
+   services:
+     filebrowser-commander:
+       image: ghcr.io/stevenwdhu/filebrowser-commander:latest
+       ports:
+         - "8080:80"
+       volumes:
+         - ./data:/home/filebrowser/data # config.yaml and the database
+         - /path/to/files:/srv # what to browse
+       restart: unless-stopped
+   ```
 
-  1. (Left) Multi-action button with slide-out panel.
-  2. (Middle) The powerful search bar / title
-  3. (Right) The view change toggle / overflow menu
+   The container runs as user 1000, which needs write access to both folders. On an Apple Silicon
+   Mac, add `platform: linux/amd64` to the service to run it under emulation; other ARM machines
+   need amd64 emulation (QEMU) set up first.
 
-All other functions are moved either into the action menu or pop-up menus.
-If the action does not depend on context, it will exist in the slide-out
-action panel. If the action is available based on context, it will show up as
-a pop-up menu.
+3. Go to port 8080 on that machine (http://localhost:8080 locally) and sign in as `admin` with
+   the password the first start prints: `docker compose logs | grep 'admin password'`. You'll choose
+   your own then. It's printed only once, so if you lose it before signing in, stop the
+   container, delete `data/database.sqlite*` and start again.
 
-<img width="1200" height="750" alt="Aug-07-2026 14-54-55" src="https://github.com/user-attachments/assets/fd1c1747-f30f-4e21-b991-f45744416d7e" />
+## Develop
 
-## Official Docs
+`make setup` and `make dev` run it locally with hot reload, as in FileBrowser Quantum. A plain
+`docker build -f _docker/Dockerfile .` keeps upstream's usage reporting and has no version;
+[commander-image.yaml](.github/workflows/commander-image.yaml) shows how the published image is
+built.
 
-See the [Official Docs](https://filebrowserquantum.com/). Contributions are welcome and encouraged! See [FilebrowserDocs Github](https://github.com/quantumx-apps/filebrowserDocs).
+The two-pane code is mostly in its own files, such as `frontend/src/components/dualPane/`,
+`frontend/src/store/dualPane.js` and `frontend/src/css/dualPane.css`, with small hooks into
+upstream files. `frontend/src/components/dualPane/upstreamContract.test.js` checks the upstream
+markup and code those hooks rely on, so a rebase that changes them fails the tests. The copy and
+move changes edit upstream's `MoveCopy.vue`, `FileList.vue` and the server's copy code directly.
 
-## Comparison Chart
-Application Name | <img width="48" alt="" src="https://github.com/user-attachments/assets/c40b22c9-33da-47b7-bc4c-ce69bb5cc174" > Quantum | <img width="48" alt="" src="https://github.com/filebrowser/filebrowser/blob/master/frontend/public/img/logo.svg" > Filebrowser | <img width="48" alt="" src="https://github.com/mickael-kerjean/filestash/blob/master/public/assets/logo/app_icon.png?raw=true" > Filestash | <img width="48" alt="" src="https://avatars.githubusercontent.com/u/19211038?s=200&v=4" >  Nextcloud | <img width="48" alt="" src="https://cdn.iconscout.com/icon/free/png-256/free-google-drive-logo-icon-svg-download-png-2476481.png" > Google_Drive | <img width="48" alt="" src="https://avatars.githubusercontent.com/u/6422152?v=4" > FileRun
---- | --- | --- | --- | --- | --- | --- |
-Filesystem support            | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-Linux                         | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-Windows                       | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-Mac                           | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-Self hostable                 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-Has Stable Release?           | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-S3 support                    | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
-webdav support                | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
-FTP support                   | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ |
-Dedicated docs site?          | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-Multiple sources at once      | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
-Docker image size             | 180 MB (with ffmpeg) | 31 MB  | 240 MB (main image) | 250 MB | ❌ | > 2 GB |
-Min. Memory Requirements      | 512 MB | 128 MB | 128 MB (main image) | 512 MB | ❌ | 512 MB   |
-has standalone binary         | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-price                         | free | free | free | free tier | free tier | $99+ |
-rich media preview            | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-Upload files from the web?    | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-Advanced Search?              | ✅ | ❌ | ✅ | configurable | ✅ | ✅ |
-Indexed Search?               | ✅ | ❌ | ✅ | configurable | ✅ | ✅ |
-Content-aware search?         | ❌ | ❌ | ✅ | configurable | ✅ | ✅ |
-Custom job support            | :construction: | ✅ | ✅ | ✅ | ❌ | ✅ |
-Multiple users                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-Single sign-on support        | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-LDAP sign-on support          | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-Long-live API key support     | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-API documentation page        | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-Mobile App                    | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-open source?                  | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-tags support                  | :construction: | ❌ | ✅ | ✅ | ❌ | ✅ |
-shareable web links?          | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-Event-based notifications     | :construction: | ❌ | ✅ | ❌ | ❌ | ✅ |
-Metrics                       | :construction: | ❌ | ✅ | ✅ | ❌ | ❌ |
-file space quotas             | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ |
-text-based files editor       | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-Office file support           | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-Office file previews          | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
-Themes                        | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-Branding support              | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-activity log                  | ✅ | ❌ | ✅ | ✅ | ✅ | ✅
-Comments support              | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-trash support                 | :construction: | ❌ | ✅ | ✅ | ✅ | ✅ |
-Starred/pinned files          | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-Chromecast support            | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-Share collections of files    | :construction: | ❌ | ❌ | ❌ | ❌ | ✅ |
-Can archive selected files    | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
-Can browse archive files      | :construction: | ❌ | ✅ | ❌ | ❌ | ✅ |
-Can convert documents         | :construction: | ❌ | ✅ | ❌ | ❌ | ✅ |
-Can convert videos            | :construction: | ❌ | ✅ | ❌ | ❌ | ❌ |
-Can convert photos            | :construction: | ❌ | ✅ | ❌ | ❌ | ❌ |
+## License
+
+Apache License 2.0, like FileBrowser Quantum; see [LICENSE](LICENSE).
