@@ -51,12 +51,14 @@ func GetSettingsConfig(nameType string, Value string) string {
 	return nameType + Value
 }
 
+// AdminPerms are the admin's global permissions when it's created or reset to the configured
+// password. Realtime is on so a restart doesn't turn off live updates and copy/move progress.
 func AdminPerms() users.Permissions {
 	return users.Permissions{
 		Share:    true,
 		Admin:    true,
 		Api:      true,
-		Realtime: false,
+		Realtime: true,
 	}
 }
 
