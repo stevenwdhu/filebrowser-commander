@@ -255,6 +255,21 @@ export function rightViewMode() {
   return saved || state.user?.viewMode || "normal";
 }
 
+/**
+ * The width ListingView divides into columns in the normal layout. It measures #main, which takes in
+ * a sticky sidebar's padding; with both panes shown the left pane counts its own rows' width, as
+ * the right pane does (DualPaneList), so the size slider gives both the same columns.
+ */
+export function listingColumnsWidth(main) {
+  if (!dualPane.shown) return main.offsetWidth;
+  const list = main.querySelector(".listing-items");
+  const box = list || main;
+  const style = getComputedStyle(box);
+  const width = box.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  // Before the rows first render, less the listing's own padding
+  return list ? width : width - parseFloat(style.fontSize);
+}
+
 /** The layout the top bar's Switch view changes: the right pane's while it's the active one, else the main listing's. */
 export function activePaneViewMode() {
   return dualPane.shown && dualPane.active === "right" ? rightViewMode() : getters.viewMode();

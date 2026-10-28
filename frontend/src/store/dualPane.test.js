@@ -20,6 +20,7 @@ vi.mock("@/api", () => ({ resourcesApi: api }));
 import {
   cursorHidden,
   dualPane,
+  listingColumnsWidth,
   initDualPane,
   openRight,
   otherPaneContext,
@@ -164,6 +165,30 @@ describe("dual-pane store", () => {
     expect(otherPaneDestination([{ source: "backup", path: "/x/one.txt" }])).toEqual({ source: "tank", path: "/docs/" });
     dualPane.shown = false;
     expect(otherPaneDestination([{ source: "tank", path: "/docs/a.txt" }])).toBeNull();
+  });
+
+  it("gives the left listing its own width to divide into columns while both panes are shown", () => {
+    const sized = (element, { client = 0, offset = 0 } = {}) => {
+      Object.defineProperty(element, "clientWidth", { value: client });
+      Object.defineProperty(element, "offsetWidth", { value: offset });
+      return element;
+    };
+    // #main takes in a sticky sidebar's 320px
+    const main = sized(document.createElement("div"), { client: 846, offset: 846 });
+    main.style.cssText = "padding-left: 320px; padding-right: 0; font-size: 16px";
+    document.body.append(main);
+    dualPane.shown = false;
+    expect(listingColumnsWidth(main)).toBe(846);
+    dualPane.shown = true;
+    // Before the rows render: #main's content, less the listing's padding
+    expect(listingColumnsWidth(main)).toBe(510);
+    const list = sized(document.createElement("div"), { client: 517 });
+    list.className = "listing-items";
+    list.style.cssText = "padding-left: 8px; padding-right: 0";
+    main.append(list);
+    expect(listingColumnsWidth(main)).toBe(509);
+    main.remove();
+    dualPane.shown = false;
   });
 
   it("hides the cursor outline from single-click users until they use the keyboard", () => {

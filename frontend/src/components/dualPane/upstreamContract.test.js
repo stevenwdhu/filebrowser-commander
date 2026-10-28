@@ -122,6 +122,8 @@ describe("upstream contract for the dual pane", () => {
       "const iconSize = (3.2 + (size * 0.15)).toFixed(2); // 3.35em to 4.55em",
       "const iconFontSize = (2.2 + (size * 0.12)).toFixed(2); // 2.32em to 3.28em",
       "columnWidth: 250 + state.user.gallerySize * 50,",
+      // With both panes shown the left pane counts its own width, as paneColumns does for the right
+      "let columns = Math.floor(listingColumnsWidth(elem) / this.columnWidth);",
     ]) {
       expect(ListingView).toContain(line);
     }
