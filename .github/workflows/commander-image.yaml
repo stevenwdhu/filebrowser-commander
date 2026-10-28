@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - "main"
+    # No Markdown file goes into the image, so a docs-only push would only republish the same app
+    # under a new sha- tag
+    paths-ignore:
+      - "**.md"
   workflow_dispatch:
 
 permissions:
