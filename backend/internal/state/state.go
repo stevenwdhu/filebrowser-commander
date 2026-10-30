@@ -88,6 +88,7 @@ func initialize(dbPath string) (bool, error) {
 			return existingDb, fmt.Errorf("failed to run initial setup: %w", err)
 		}
 	}
+	turnOnRealtimeForExistingAdminsOnce()
 
 	logger.Debugf("Loading shares and index data into memory...")
 

@@ -275,6 +275,7 @@ func CreateUser(user *users.User, plaintextPassword string) error {
 			user.BackendSourcePermissions[scope.Path] = perms
 		}
 	}
+	applyAdminRealtimeDefault(nil, user)
 	defaults := EffectiveUserDefaults()
 	enforced := EffectiveEnforced()
 	settings.ApplyEnforcedDefaultsFrom(user, defaults, enforced)
@@ -432,6 +433,7 @@ func commitUserUpdate(existingUser, storedSnapshot *users.User, sourceDefaults u
 	oldUsername := storedSnapshot.Username
 	oldUserID := storedSnapshot.ID
 
+	applyAdminRealtimeDefault(storedSnapshot, existingUser)
 	users.SyncBackendSourcePermissionsMap(existingUser)
 	existingUser.FrontendScopes = nil
 	existingUser.SourcePermissions = nil

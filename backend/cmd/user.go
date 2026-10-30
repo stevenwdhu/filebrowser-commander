@@ -86,7 +86,11 @@ func validateUserInfo(newDB bool) {
 		}
 		if user.Username == adminUser && settings.ConfigTriggersAdminPasswordReset() && user.LoginMethod == users.LoginMethodPassword {
 			logger.Info("Resetting admin user to default username and password.")
+			wasAdmin, realtime := user.Permissions.Admin, user.Permissions.Realtime
 			user.Permissions = settings.AdminPerms()
+			if wasAdmin {
+				user.Permissions.Realtime = realtime // FileBrowser Commander: an admin keeps its Realtime choice
+			}
 			user.Password = settings.PasswordAdminPassword()
 			user.LoginMethod = users.LoginMethodPassword
 			changedFields = append(changedFields, "permissions", "password", "loginMethod")

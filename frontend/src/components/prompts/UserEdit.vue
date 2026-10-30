@@ -245,6 +245,7 @@ import { validateLogin } from "@/utils/auth";
 import { globalVars } from "@/utils/constants";
 import { eventBus } from "@/store/eventBus";
 import { getObjectProperty, setObjectProperty } from "@/utils/object.js";
+import { withAdminRealtimeDefault } from "@/utils/adminRealtimeDefault.js";
 import {
   GB,
   bytesFromCustomAmount,
@@ -1132,6 +1133,7 @@ export default {
       this.editAccount[fieldStr] = value;
     },
     onEditAccountChange(field, value) {
+      this.editAccount.permissions = withAdminRealtimeDefault(this.editAccount.permissions, field, value);
       this.applyEditAccountField(field, value);
       this.applyEditAccountToUser();
       this.emitUpdate();

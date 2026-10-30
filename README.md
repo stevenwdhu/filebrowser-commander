@@ -51,14 +51,15 @@ main listing, work as in FileBrowser Quantum.
   current item's bytes, the speed and the time left. Any other move is a rename and finishes at
   once.
 - Bytes, speed and time left need the Realtime permission ("Enable real-time connections and
-  updates"). An admin account this server creates, or resets from `adminPassword` in the config,
-  has it; for anyone else, an admin turns it on.
+  updates"). Admins have it by default; for other users, an admin turns it on.
 - Copies still use `copy_file_range`, so ZFS block cloning still works where the pool has it on.
 
 **Smaller changes**
 
 - The app calls itself FileBrowser Commander. Internal names, such as the login cookie, stay
   upstream's.
+- Admins get the Realtime permission: any account that becomes an admin, and, once, the admins
+  already there when you upgrade, such as one from FileBrowser Quantum. They can turn it off.
 - The published image is built without upstream's opt-in usage reporting, shows its version as
   `commander-<commit>`, and doesn't offer FileBrowser Quantum's updates.
 
